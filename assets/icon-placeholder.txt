@@ -1,0 +1,11 @@
+Place your icon files here:
+  icon.ico   — Windows (256x256, ICO format)
+  icon.icns  — macOS
+  icon.png   — Linux / fallback (512x512 PNG recommended)
+
+You can create a free icon at:
+  https://www.favicon.io
+  https://convertio.co/png-ico/
+
+electron-builder will use icon.ico when building the Windows installer.
+If no icon is present the build will still work but use the default Electron icon.
