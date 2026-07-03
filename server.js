@@ -67,9 +67,14 @@ function getProfile(name) {
   if (!profileStore[name]) {
     profileStore[name] = {
       avatar: null, bio: '', status: 'online',
-      coins: 0, premium: false, premiumSince: null,
+      coins: name === 'Petnan Fwangkwal' ? 100000 : 0,
+      premium: false, tier: null, premiumSince: null,
       studyMinutes: 0,
     };
+  }
+  // ensure Petnan always starts with 100k if not set yet
+  if (name === 'Petnan Fwangkwal' && profileStore[name].coins === 0) {
+    profileStore[name].coins = 100000;
   }
   return profileStore[name];
 }
@@ -78,9 +83,16 @@ function getProfile(name) {
 // studySessions[name] = { startTime, intervalId }
 const studySessions = {};
 
-const COINS_PER_30MIN  = 100;   // earn 100 coins every 30 min of study
-const PREMIUM_COST     = 2000;  // 2000 coins to buy premium
-const STUDY_INTERVAL_MS = 30 * 60 * 1000; // 30 minutes
+const COINS_PER_30MIN  = 100;
+const STUDY_INTERVAL_MS = 30 * 60 * 1000;
+
+// ── Tier costs ────────────────────────────────────────────────────────────────
+const TIERS = {
+  pro:     { cost: 500,  label: '5G Pro',    color: '#60a5fa', emoji: '🔵' },
+  silver:  { cost: 1000, label: '5G Silver', color: '#94a3b8', emoji: '🩶' },
+  gold:    { cost: 1500, label: '5G Gold',   color: '#f59e0b', emoji: '🥇' },
+  premium: { cost: 2000, label: '5G Premium',color: '#fbbf24', emoji: '⭐' },
+};
 
 function startStudySession(name, socket) {
   if (studySessions[name]) return; // already running
@@ -472,23 +484,46 @@ io.on('connection', (socket) => {
     socket.emit('studyStopped', { message: 'Study session ended.' });
   });
 
-  socket.on('buyPremium', () => {
+  socket.on('buyTier', ({ tier }) => {
     const name = socket.data.name;
     if (!name) return;
     const p = getProfile(name);
-    if (p.premium) {
-      socket.emit('premiumError', 'You already have Premium!');
+    const t = TIERS[tier];
+    if (!t) { socket.emit('tierError', 'Invalid tier.'); return; }
+
+    // check if already has this tier or higher
+    const tierOrder = ['pro','silver','gold','premium'];
+    const currentIdx = tierOrder.indexOf(p.tier);
+    const newIdx = tierOrder.indexOf(tier);
+    if (currentIdx >= newIdx) {
+      socket.emit('tierError', `You already have ${t.label} or higher!`);
       return;
     }
-    if (p.coins < PREMIUM_COST) {
-      socket.emit('premiumError', `You need ${PREMIUM_COST} coins. You have ${p.coins}. Keep studying!`);
+    if (p.coins < t.cost) {
+      socket.emit('tierError', `You need ${t.cost} coins for ${t.label}. You have ${p.coins}. Keep studying!`);
       return;
     }
-    p.coins -= PREMIUM_COST;
-    p.premium = true;
+    p.coins -= t.cost;
+    p.tier = tier;
+    p.premium = (tier === 'premium');
     p.premiumSince = new Date().toISOString();
-    console.log(`⭐ ${name} purchased Premium`);
-    socket.emit('premiumUnlocked', { profile: p });
+    console.log(`${t.emoji} ${name} purchased ${t.label}`);
+    socket.emit('tierUnlocked', { tier, tierLabel: t.label, emoji: t.emoji, profile: p });
+    io.emit('profileUpdated', { name, profile: p });
+  });
+
+  // keep old buyPremium for compatibility
+  socket.on('buyPremium', () => {
+    socket.emit('buyTierProxy');
+    const name = socket.data.name;
+    if (!name) return;
+    const p = getProfile(name);
+    const t = TIERS.premium;
+    if (p.tier === 'premium') { socket.emit('tierError', 'You already have Premium!'); return; }
+    if (p.coins < t.cost) { socket.emit('tierError', `You need ${t.cost} coins. You have ${p.coins}. Keep studying!`); return; }
+    p.coins -= t.cost; p.tier = 'premium'; p.premium = true;
+    p.premiumSince = new Date().toISOString();
+    socket.emit('tierUnlocked', { tier: 'premium', tierLabel: '5G Premium', emoji: '⭐', profile: p });
     io.emit('profileUpdated', { name, profile: p });
   });
 

@@ -595,12 +595,33 @@ input,textarea,select{font-family:inherit}
               <div class="earn-item"><span class="ei-icon">📋</span><div class="ei-info"><p>Submit homework</p><span>Submit an assignment on the board</span></div><span class="ei-coins">+50 🪙</span></div>
             </div>
             <div class="coins-grid">
-              <div class="c-card" id="premiumCard">
+              <div class="c-card" id="tierCard-pro">
+                <div style="font-size:2.3rem;margin-bottom:9px">🔵</div>
+                <h3>5G Pro</h3>
+                <p>Blue name colour, 🔵 Pro badge — great for getting started!</p>
+                <div class="c-price">500 🪙</div>
+                <button class="c-buy" id="tierBtn-pro" onclick="buyTier('pro')">Get 5G Pro</button>
+              </div>
+              <div class="c-card" id="tierCard-silver">
+                <div style="font-size:2.3rem;margin-bottom:9px">🩶</div>
+                <h3>5G Silver</h3>
+                <p>Silver name colour, 🩶 Silver badge — stand out from the crowd!</p>
+                <div class="c-price">1,000 🪙</div>
+                <button class="c-buy" id="tierBtn-silver" onclick="buyTier('silver')">Get 5G Silver</button>
+              </div>
+              <div class="c-card" id="tierCard-gold">
+                <div style="font-size:2.3rem;margin-bottom:9px">🥇</div>
+                <h3>5G Gold</h3>
+                <p>Golden name colour, 🥇 Gold badge — for the top students!</p>
+                <div class="c-price">1,500 🪙</div>
+                <button class="c-buy" id="tierBtn-gold" onclick="buyTier('gold')">Get 5G Gold</button>
+              </div>
+              <div class="c-card" id="tierCard-premium">
                 <div style="font-size:2.3rem;margin-bottom:9px">⭐</div>
                 <h3>5G Premium</h3>
-                <p>Golden shimmering name, premium badge, priority AI, and exclusive features for top students!</p>
+                <p>Golden shimmering name, ⭐ Premium badge, priority AI — the ultimate tier!</p>
                 <div class="c-price">2,000 🪙</div>
-                <button class="c-buy" id="premBuyBtn" onclick="buyPremium()">Get Premium</button>
+                <button class="c-buy" id="tierBtn-premium" onclick="buyTier('premium')">Get Premium</button>
               </div>
             </div>
           </div>
@@ -1631,79 +1652,92 @@ function postHW(){
 // ═══════════════════════════════════════
 // CLASS COINS & PREMIUM
 // ═══════════════════════════════════════
-function updateCoinUI(coins, premium){
-  myProfile.coins=coins;
-  myProfile.premium=premium;
+function updateCoinUI(coins, premium, tier){
+  tier = tier || myProfile.tier || null;
+  myProfile.coins=coins; myProfile.premium=premium; myProfile.tier=tier;
   profileCache[ME]=profileCache[ME]||{};
-  profileCache[ME].coins=coins;
-  profileCache[ME].premium=premium;
-  document.getElementById('coinCount').textContent=coins;
+  profileCache[ME].coins=coins; profileCache[ME].premium=premium; profileCache[ME].tier=tier;
+
+  document.getElementById('coinCount').textContent=coins.toLocaleString();
+
+  // topbar tier badge
   const pmBadge=document.getElementById('pmBadge');
-  if(pmBadge) pmBadge.style.display=premium?'':'none';
-  // coins section
+  const TIER_LABELS={pro:'🔵 5G Pro',silver:'🩶 5G Silver',gold:'🥇 5G Gold',premium:'⭐ Premium'};
+  if(pmBadge){
+    if(tier){ pmBadge.textContent=TIER_LABELS[tier]||'⭐ Premium'; pmBadge.style.display=''; }
+    else { pmBadge.style.display='none'; }
+  }
+
+  // coins hero
   const hero=document.getElementById('heroCoins');
   if(hero) hero.textContent=coins.toLocaleString()+' Class Coins';
   const fill=document.getElementById('progFill');
   const pct=document.getElementById('progPct');
-  const progVal=Math.min(100, Math.round((coins/2000)*100));
+  const progVal=Math.min(100,Math.round((coins/2000)*100));
   if(fill) fill.style.width=progVal+'%';
   if(pct) pct.textContent=progVal+'%';
-  // premium card state
-  const buyBtn=document.getElementById('premBuyBtn');
-  const card=document.getElementById('premiumCard');
-  if(buyBtn){
-    if(premium){
-      buyBtn.textContent='✅ You have Premium!';
-      buyBtn.disabled=true;
-    } else if(coins<2000){
-      buyBtn.textContent=`Need ${(2000-coins).toLocaleString()} more coins`;
-      buyBtn.disabled=true;
-    } else {
-      buyBtn.textContent='Get Premium';
-      buyBtn.disabled=false;
-    }
-  }
+
+  // tier buy buttons
+  const tierOrder=['pro','silver','gold','premium'];
+  const costs={pro:500,silver:1000,gold:1500,premium:2000};
+  const currentIdx=tierOrder.indexOf(tier);
+  tierOrder.forEach((t,i)=>{
+    const btn=document.getElementById('tierBtn-'+t);
+    if(!btn) return;
+    if(i<=currentIdx){ btn.textContent='✅ Owned'; btn.disabled=true; }
+    else if(coins<costs[t]){ btn.textContent=`Need ${(costs[t]-coins).toLocaleString()} more 🪙`; btn.disabled=true; }
+    else { btn.textContent={pro:'Get 5G Pro',silver:'Get 5G Silver',gold:'Get 5G Gold',premium:'Get Premium'}[t]; btn.disabled=false; }
+  });
+
   // settings
   const sc=document.getElementById('settingsCoins');
   const sp=document.getElementById('settingsPrem');
   if(sc) sc.value=coins.toLocaleString()+' 🪙';
-  if(sp) sp.value=premium?'⭐ Yes — Premium member!':'Not yet (need 2,000 coins)';
+  if(sp) sp.value=tier ? (TIER_LABELS[tier]||'Active') : 'None yet';
 }
 
 socket.on('coinsEarned',({coins,total,reason})=>{
   myProfile.coins=total;
-  updateCoinUI(total, myProfile.premium||false);
+  updateCoinUI(total, myProfile.premium||false, myProfile.tier||null);
   showToast(`🪙 +${coins} coins — ${reason}`, 'coin-toast');
 });
 
 socket.on('coinsData',({coins,premium,studyMinutes})=>{
-  updateCoinUI(coins,premium);
+  myProfile.coins=coins; myProfile.premium=premium;
+  updateCoinUI(coins, premium, myProfile.tier||null);
   const sm=document.getElementById('studyMinsDisplay');
   if(sm) sm.textContent=studyMinutes+' min';
 });
 
+socket.on('tierUnlocked',({tier,tierLabel,emoji,profile})=>{
+  myProfile=Object.assign(myProfile,profile);
+  profileCache[ME]=myProfile;
+  updateCoinUI(profile.coins, profile.premium||false, tier);
+  showToast(`${emoji} ${tierLabel} unlocked! Enjoy your new status!`,'coin-toast');
+  buildDMList(); buildMembersList();
+});
+
+socket.on('tierError', msg=>{ showToast('⚠️ '+msg); });
 socket.on('premiumUnlocked',({profile})=>{
   myProfile=Object.assign(myProfile,profile);
   profileCache[ME]=myProfile;
-  updateCoinUI(profile.coins,true);
-  showToast('⭐ Welcome to 5G Premium! Your name now shimmers in gold!','coin-toast');
-  buildDMList();
-  buildMembersList();
+  updateCoinUI(profile.coins,true,'premium');
+  showToast('⭐ 5G Premium unlocked!','coin-toast');
+  buildDMList(); buildMembersList();
 });
-
 socket.on('premiumError', msg=>{ showToast('⚠️ '+msg); });
 socket.on('studyStarted', ()=>{ showToast('📖 Study session started! Earn 100 coins every 30 mins.'); });
-socket.on('studyStopped', ()=>{ /* handled locally */ });
+socket.on('studyStopped', ()=>{ });
 
-function refreshCoins(){
-  socket.emit('getCoins');
-}
+function refreshCoins(){ socket.emit('getCoins'); }
 
-function buyPremium(){
-  if(myProfile.premium){ showToast('You already have Premium! ⭐'); return; }
-  if((myProfile.coins||0)<2000){ showToast(`You need ${2000-(myProfile.coins||0)} more coins!`); return; }
-  socket.emit('buyPremium');
+function buyTier(tier){
+  const costs={pro:500,silver:1000,gold:1500,premium:2000};
+  const cost=costs[tier]||2000;
+  if((myProfile.coins||0)<cost){ showToast(`You need ${cost-( myProfile.coins||0)} more coins!`); return; }
+  socket.emit('buyTier',{tier});
 }
+function buyPremium(){ buyTier('premium'); }
 
 // ── Study Timer (client-side clock, server awards coins) ──
 function startStudy(){
