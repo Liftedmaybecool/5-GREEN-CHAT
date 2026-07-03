@@ -348,7 +348,7 @@ input,textarea,select{font-family:inherit}
       <div class="sw"><button class="sb-btn" id="sb-dm" onclick="showSection('dm')">✉️<span class="sb-dot"></span></button><span class="tip">Direct Messages</span></div>
       <div class="sw"><button class="sb-btn" id="sb-groups" onclick="showSection('groups')">👥<span class="sb-dot"></span></button><span class="tip">Groups</span></div>
       <div class="sb-div"></div>
-      <div class="sw"><button class="sb-btn" id="sb-ai" onclick="showSection('ai')">🤖</button><span class="tip">5 GREEN AI</span></div>
+      <div class="sw"><button class="sb-btn ai-sb-btn" id="sb-ai" onclick="showSection('ai')" style="background:linear-gradient(135deg,#4c1d95,#7c3aed);border-color:rgba(167,139,250,.5);box-shadow:0 0 10px rgba(167,139,250,.3)">🤖</button><span class="tip">5 GREEN AI</span></div>
       <div class="sb-div"></div>
       <div class="sw"><button class="sb-btn" id="sb-homework" onclick="showSection('homework')">📚</button><span class="tip">Homework & Study</span></div>
       <div class="sw"><button class="sb-btn" id="sb-coins" onclick="showSection('coins')">🪙</button><span class="tip">Class Coins</span></div>
@@ -378,7 +378,13 @@ input,textarea,select{font-family:inherit}
           </div>
         </div>
         <div id="pnl-ai" style="display:none">
-          <div class="panel-hdr"><h3>🤖 5 GREEN AI</h3><p>Your super-smart tutor</p></div>
+          <div class="panel-hdr">
+            <div style="display:flex;align-items:center;gap:9px;margin-bottom:4px">
+              <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4c1d95,#7c3aed,#a78bfa);display:flex;align-items:center;justify-content:center;font-size:.9rem;box-shadow:0 0 8px rgba(167,139,250,.4);flex-shrink:0">🤖</div>
+              <h3 style="margin:0">5 GREEN AI</h3>
+            </div>
+            <p>Your super-smart tutor</p>
+          </div>
           <div class="panel-body">
             <div class="p-sec">AI ASSISTANT</div>
             <div class="p-item active"><span class="pi">🤖</span><span class="pn">5 GREEN AI</span></div>
@@ -500,14 +506,14 @@ input,textarea,select{font-family:inherit}
         <div class="section" id="section-ai">
           <div class="chat-hdr">
             <div class="chat-hdr-l">
-              <div style="width:36px;height:36px;border-radius:50%;background:rgba(167,139,250,.2);border:2px solid rgba(167,139,250,.4);display:flex;align-items:center;justify-content:center;font-size:1.05rem">🤖</div>
+              <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#4c1d95,#7c3aed,#a78bfa);border:2px solid rgba(167,139,250,.5);display:flex;align-items:center;justify-content:center;font-size:1.15rem;box-shadow:0 0 12px rgba(167,139,250,.4);flex-shrink:0">🤖</div>
               <div><h2>5 GREEN AI</h2><p>All-knowing · Super-smart · Always helpful</p></div>
             </div>
             <button class="hdr-btn" onclick="clearAIChat()">🗑 Clear</button>
           </div>
           <div class="messages" id="aiMsgs">
             <div id="aiWelcome" style="text-align:center;padding:36px 20px;color:var(--text3);max-width:480px;margin:0 auto">
-              <div style="font-size:2.8rem;margin-bottom:12px">🤖</div>
+              <div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#4c1d95,#7c3aed,#a78bfa);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;box-shadow:0 0 30px rgba(167,139,250,.5);border:3px solid rgba(167,139,250,.4)">🤖</div>
               <h3 style="color:var(--purple);margin-bottom:7px;font-size:1.05rem">Hello! I'm 5 GREEN AI</h3>
               <p style="font-size:.82rem;line-height:1.7;color:var(--text2)">I know everything — maths, science, English, history, coding, and more. Ask me anything! Created by <strong style="color:var(--accent)">Petnan Fwangkwal</strong>.</p>
               <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:15px">
