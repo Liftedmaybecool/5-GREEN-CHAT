@@ -256,9 +256,42 @@ io.on('connection', (socket) => {
     if (aiConversations[name].length > 40) aiConversations[name].splice(0, 2);
 
     try {
+      // ── Wikipedia real-time lookup ──────────────────────────────────────
+      let wikiContext = '';
+      try {
+        // extract key topic from the question
+        const topicRes = await groq.chat.completions.create({
+          model: 'llama-3.3-70b-versatile',
+          messages: [
+            { role: 'system', content: 'Extract the main search topic from this question as 2-4 words only. Reply with ONLY the search term, nothing else.' },
+            { role: 'user', content: text.trim() }
+          ],
+          max_tokens: 20, temperature: 0,
+        });
+        const topic = topicRes.choices[0].message.content.trim().replace(/['"]/g, '');
+        // search Wikipedia
+        const searchUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`;
+        const wikiRes = await fetch(searchUrl);
+        if (wikiRes.ok) {
+          const wikiData = await wikiRes.json();
+          if (wikiData.extract && wikiData.extract.length > 50) {
+            wikiContext = `\n\n[Wikipedia on "${wikiData.title}"]: ${wikiData.extract}`;
+          }
+        }
+      } catch (e) { /* wiki lookup failed silently, AI still answers from training */ }
+
+      const messagesWithWiki = [...aiConversations[name]];
+      if (wikiContext) {
+        // inject wiki info into the last user message
+        messagesWithWiki[messagesWithWiki.length - 1] = {
+          role: 'user',
+          content: text.trim() + wikiContext
+        };
+      }
+
       const completion = await groq.chat.completions.create({
         model:       'llama-3.3-70b-versatile',
-        messages:    [{ role: 'system', content: AI_SYSTEM_PROMPT }, ...aiConversations[name]],
+        messages:    [{ role: 'system', content: AI_SYSTEM_PROMPT }, ...messagesWithWiki],
         max_tokens:  2048,
         temperature: 0.7,
         stream:      false,
