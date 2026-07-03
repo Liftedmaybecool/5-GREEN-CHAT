@@ -647,5 +647,5 @@ const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
   console.log(`\n🟢 5 Green Chat running at http://0.0.0.0:${PORT}\n`);
   console.log(`📚 ${STUDENTS.length} students registered`);
-  console.log(`🪙 Coins: ${COINS_PER_30MIN} per 30min study | Premium costs ${PREMIUM_COST} coins\n`);
+  console.log(`🪙 Coins: ${COINS_PER_30MIN} per 30min study | Pro:500 Silver:1000 Gold:1500 Premium:2000\n`);
 });
