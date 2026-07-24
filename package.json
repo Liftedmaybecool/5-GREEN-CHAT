@@ -1,7 +1,7 @@
 {
-  "name": "5-green-chat",
+  "name": "classmates-chat",
   "version": "1.0.0",
-  "description": "5 Green Chat — 5 Green Communication Platform",
+  "description": "Classmates Chat — 5 Green Communication Platform",
   "main": "server.js",
   "author": "Petnan Fwangkwal",
   "license": "MIT",
@@ -13,6 +13,7 @@
     "dev": "nodemon server.js"
   },
   "dependencies": {
+    "@google/generative-ai": "^0.21.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.1",
     "express": "^4.18.2",

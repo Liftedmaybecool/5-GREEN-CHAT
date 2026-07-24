@@ -2,6 +2,7 @@ require('dotenv').config();
 const express    = require('express');
 const cors       = require('cors');
 const Groq       = require('groq-sdk');
+const { GoogleGenerativeAI } = require('@google/generative-ai');
 const path       = require('path');
 const http       = require('http');
 const fs         = require('fs');
@@ -31,7 +32,88 @@ app.use(cors());
 app.use(express.json({ limit: '10mb' }));
 app.use(express.static(path.join(__dirname)));
 
-const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+// ── Groq (primary AI) ─────────────────────────────────────────────────────────
+const groqClients = [
+  process.env.GROQ_API_KEY,
+  process.env.GROQ_API_KEY_2,
+].filter(Boolean).map(key => new Groq({ apiKey: key }));
+
+if (groqClients.length === 0) console.warn('⚠️  No GROQ_API_KEY found!');
+else console.log(`🤖 Groq: ${groqClients.length} API key(s) loaded`);
+
+// ── Gemini (fallback AI) ───────────────────────────────────────────────────────
+let gemini = null;
+if (process.env.GEMINI_API_KEY) {
+  const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+  gemini = genAI.getGenerativeModel({ model: 'gemini-1.5-flash' });
+  console.log('✨ Gemini fallback ready');
+} else {
+  console.warn('⚠️  No GEMINI_API_KEY — fallback disabled');
+}
+
+// ── Smart AI caller: Groq first, Gemini if Groq fails ─────────────────────────
+async function callAI(messages, systemPrompt) {
+  // Build the full messages array with system prompt
+  const fullMessages = [{ role: 'system', content: systemPrompt }, ...messages];
+
+  // Try each Groq key first
+  for (const client of groqClients) {
+    try {
+      const res = await client.chat.completions.create({
+        model:       'llama-3.3-70b-versatile',
+        messages:    fullMessages,
+        max_tokens:  2048,
+        temperature: 0.7,
+      });
+      return res.choices[0].message.content;
+    } catch (err) {
+      const status = err?.status || err?.statusCode || err?.error?.status;
+      if (status === 429 || status === 401 || status === 503) {
+        console.warn(`⚠️  Groq failed (${status}), trying next…`);
+        continue;
+      }
+      throw err;
+    }
+  }
+
+  // All Groq keys failed — try Gemini
+  if (gemini) {
+    console.log('🔄 Switching to Gemini fallback…');
+    try {
+      // Convert messages to Gemini format
+      const history = messages.slice(0, -1).map(m => ({
+        role:  m.role === 'assistant' ? 'model' : 'user',
+        parts: [{ text: m.content }],
+      }));
+      const lastMsg = messages[messages.length - 1]?.content || '';
+      const chat = gemini.startChat({
+        history,
+        systemInstruction: systemPrompt,
+      });
+      const result = await chat.sendMessage(lastMsg);
+      return result.response.text();
+    } catch (gErr) {
+      console.error('Gemini also failed:', gErr.message);
+      throw gErr;
+    }
+  }
+
+  throw new Error('All AI providers failed and no fallback available.');
+}
+
+// Separate lighter groqCreate for the topic-extraction mini-call (no fallback needed)
+async function groqMiniCreate(params) {
+  for (const client of groqClients) {
+    try {
+      return await client.chat.completions.create(params);
+    } catch (err) {
+      const status = err?.status || err?.statusCode;
+      if (status === 429 || status === 401) continue;
+      throw err;
+    }
+  }
+  return null; // silently skip wiki lookup if all keys busy
+}
 
 // ── Student roster ─────────────────────────────────────────────────────────────
 const STUDENTS = [
@@ -363,7 +445,7 @@ io.on('connection', (socket) => {
       // ── Wikipedia real-time lookup ──────────────────────────────────────
       let wikiContext = '';
       try {
-        const topicRes = await groq.chat.completions.create({
+        const topicRes = await groqMiniCreate({
           model: 'llama-3.3-70b-versatile',
           messages: [
             { role: 'system', content: 'Extract the main search topic from this question as 2-4 words only. Reply with ONLY the search term, nothing else.' },
@@ -371,13 +453,15 @@ io.on('connection', (socket) => {
           ],
           max_tokens: 20, temperature: 0,
         });
-        const topic = topicRes.choices[0].message.content.trim().replace(/['"]/g, '');
-        const searchUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`;
-        const wikiRes = await fetch(searchUrl);
-        if (wikiRes.ok) {
-          const wikiData = await wikiRes.json();
-          if (wikiData.extract && wikiData.extract.length > 50) {
-            wikiContext = `\n\n[Wikipedia on "${wikiData.title}"]: ${wikiData.extract}`;
+        if (topicRes) {
+          const topic = topicRes.choices[0].message.content.trim().replace(/['"]/g, '');
+          const searchUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`;
+          const wikiRes = await fetch(searchUrl);
+          if (wikiRes.ok) {
+            const wikiData = await wikiRes.json();
+            if (wikiData.extract && wikiData.extract.length > 50) {
+              wikiContext = `\n\n[Wikipedia on "${wikiData.title}"]: ${wikiData.extract}`;
+            }
           }
         }
       } catch (e) { /* silent */ }
@@ -390,14 +474,7 @@ io.on('connection', (socket) => {
         };
       }
 
-      const completion = await groq.chat.completions.create({
-        model:       'llama-3.3-70b-versatile',
-        messages:    [{ role: 'system', content: AI_SYSTEM_PROMPT }, ...messagesWithContext],
-        max_tokens:  2048,
-        temperature: 0.7,
-        stream:      false,
-      });
-      const reply = completion.choices[0].message.content;
+      const reply = await callAI(messagesWithContext, AI_SYSTEM_PROMPT);
       aiConversations[name].push({ role: 'assistant', content: reply });
 
       const aiMsg = {
