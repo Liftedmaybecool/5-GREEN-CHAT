@@ -703,6 +703,78 @@ io.on('connection', (socket) => {
     socket.emit('coinsData', { coins: p.coins, premium: p.premium, studyMinutes: p.studyMinutes });
   });
 
+  // ── Coin Transfer ─────────────────────────────────────────────────────────
+  socket.on('transferCoins', ({ to, amount }) => {
+    const from = socket.data.name;
+    if (!from) return;
+
+    // Validate recipient
+    const recipient = STUDENTS.find(s => s.name === to);
+    if (!recipient) {
+      socket.emit('transferResult', { ok: false, error: `❌ "${to}" is not a valid classmate.` });
+      return;
+    }
+    if (from === to) {
+      socket.emit('transferResult', { ok: false, error: '❌ You cannot send coins to yourself.' });
+      return;
+    }
+
+    // Validate amount
+    const amt = Math.floor(Number(amount));
+    if (!amt || amt <= 0 || isNaN(amt)) {
+      socket.emit('transferResult', { ok: false, error: '❌ Please enter a valid amount.' });
+      return;
+    }
+    if (amt > 1000000) {
+      socket.emit('transferResult', { ok: false, error: '❌ Maximum transfer is 1,000,000 coins.' });
+      return;
+    }
+
+    const senderProfile    = getProfile(from);
+    const recipientProfile = getProfile(to);
+
+    // Insufficient funds check
+    if (senderProfile.coins < amt) {
+      const shortBy = amt - senderProfile.coins;
+      socket.emit('transferResult', {
+        ok: false,
+        error: `❌ Insufficient funds! You need ${shortBy.toLocaleString()} more 🪙 to complete this transfer.`,
+        balance: senderProfile.coins,
+      });
+      return;
+    }
+
+    // Execute transfer
+    senderProfile.coins    -= amt;
+    recipientProfile.coins += amt;
+
+    console.log(`💸 ${from} sent ${amt} coins to ${to} | ${from}: ${senderProfile.coins} | ${to}: ${recipientProfile.coins}`);
+
+    // Notify sender
+    socket.emit('transferResult', {
+      ok: true,
+      message: `✅ Successfully sent ${amt.toLocaleString()} 🪙 to ${to}!`,
+      newBalance: senderProfile.coins,
+      to, amount: amt,
+    });
+
+    // Notify recipient if online
+    Object.entries(connectedUsers).forEach(([sid, u]) => {
+      if (u.name === to) {
+        io.to(sid).emit('coinsReceived', {
+          from, amount: amt,
+          newBalance: recipientProfile.coins,
+          message: `💸 ${from} sent you ${amt.toLocaleString()} 🪙!`,
+        });
+        io.to(sid).emit('profileData', { name: to, profile: recipientProfile });
+      }
+    });
+
+    // Broadcast updated profiles
+    io.emit('profileUpdated', { name: from, profile: senderProfile });
+    io.emit('profileUpdated', { name: to,   profile: recipientProfile });
+  });
+
   // ── Video call signalling (WebRTC) ────────────────────────────────────────
   socket.on('callUser', ({ to, offer, from }) => {
     Object.entries(connectedUsers).forEach(([sid, u]) => {

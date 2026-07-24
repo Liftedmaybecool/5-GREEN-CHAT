@@ -569,6 +569,79 @@ input,textarea,select{font-family:inherit}
 .ei-info p{font-size:.79rem;color:var(--text2)}
 .ei-info span{font-size:.67rem;color:var(--text3)}
 .ei-coins{font-weight:700;color:var(--coin);font-size:.83rem}
+
+/* ── TRANSFER / BANK ── */
+.transfer-card{
+  background:var(--bg3);
+  border:1px solid rgba(251,191,36,.25);
+  border-radius:16px;padding:18px 20px;margin-bottom:16px;
+  box-shadow:0 0 20px rgba(251,191,36,.06);
+  position:relative;overflow:hidden;
+}
+.transfer-card::before{
+  content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,transparent,var(--neon-yellow),var(--neon-orange),var(--neon-yellow),transparent);
+  animation:shimmer 3s linear infinite;background-size:200% auto;
+}
+.transfer-header{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.transfer-icon{font-size:2rem;filter:drop-shadow(0 0 8px var(--neon-yellow))}
+.transfer-header h3{font-size:.92rem;font-weight:700;color:var(--neon-yellow);text-shadow:0 0 6px rgba(255,230,0,.4);margin-bottom:2px}
+.transfer-header p{font-size:.7rem;color:var(--text3)}
+.transfer-balance-row{display:flex;align-items:center;justify-content:space-between;background:rgba(251,191,36,.07);border:1px solid rgba(251,191,36,.15);border-radius:10px;padding:9px 14px;margin-bottom:14px}
+.transfer-bal-label{font-size:.74rem;color:var(--text2)}
+.transfer-bal-val{font-size:1.05rem;font-weight:800;color:var(--neon-yellow);text-shadow:0 0 6px rgba(255,230,0,.4)}
+.transfer-fields{display:flex;gap:10px;margin-bottom:12px;flex-wrap:wrap}
+.transfer-field{flex:1;min-width:140px}
+.transfer-field label{display:block;font-size:.68rem;color:var(--neon-cyan);text-transform:uppercase;letter-spacing:1px;margin-bottom:5px;font-weight:600}
+.transfer-field select,.transfer-amount-wrap{
+  width:100%;background:rgba(0,245,255,.04);
+  border:1px solid rgba(0,245,255,.18);
+  border-radius:9px;color:var(--text);font-size:.85rem;outline:none;
+  transition:all .2s;
+}
+.transfer-field select{padding:9px 11px}
+.transfer-field select:focus{border-color:var(--neon-cyan);box-shadow:0 0 10px rgba(0,245,255,.1)}
+.transfer-field select option{background:#07111f}
+.transfer-amount-wrap{display:flex;align-items:center;gap:7px;padding:9px 11px}
+.transfer-coin-icon{font-size:1.1rem;flex-shrink:0}
+.transfer-amount-wrap input{flex:1;background:transparent;border:none;color:var(--text);font-size:.9rem;font-weight:700;outline:none;width:100%}
+.transfer-amount-wrap input::placeholder{color:var(--text3);font-weight:400}
+.transfer-amount-wrap input::-webkit-inner-spin-button{-webkit-appearance:none}
+.transfer-amount-wrap:focus-within{border-color:var(--neon-yellow);box-shadow:0 0 10px rgba(255,230,0,.1)}
+.transfer-quick{display:flex;gap:6px;margin-bottom:13px;flex-wrap:wrap}
+.tq-btn{
+  background:rgba(251,191,36,.08);border:1px solid rgba(251,191,36,.2);
+  border-radius:7px;color:var(--neon-yellow);font-size:.75rem;font-weight:700;
+  padding:5px 12px;transition:all .2s;
+}
+.tq-btn:hover{background:rgba(251,191,36,.2);box-shadow:0 0 10px rgba(255,230,0,.2)}
+.tq-max{background:rgba(255,165,0,.1);border-color:rgba(255,165,0,.3);color:var(--neon-orange)}
+.tq-max:hover{background:rgba(255,165,0,.2);box-shadow:0 0 10px rgba(255,165,0,.2)}
+.transfer-result{
+  border-radius:9px;padding:9px 13px;margin-bottom:12px;
+  font-size:.8rem;font-weight:600;
+}
+.transfer-result.success{background:rgba(57,255,20,.08);border:1px solid rgba(57,255,20,.25);color:var(--neon-green)}
+.transfer-result.error{background:rgba(255,45,120,.08);border:1px solid rgba(255,45,120,.25);color:var(--neon-pink)}
+.transfer-send-btn{
+  width:100%;border:none;border-radius:11px;padding:12px;font-size:.9rem;font-weight:800;
+  background:linear-gradient(90deg,var(--neon-yellow),var(--neon-orange),var(--neon-yellow));
+  background-size:200% auto;animation:shimmer 2s linear infinite;
+  color:#000;box-shadow:0 0 18px rgba(255,230,0,.3);transition:all .2s;
+  font-family:inherit;
+}
+.transfer-send-btn:hover{transform:translateY(-2px);box-shadow:var(--glow-coin)}
+.transfer-send-btn:disabled{opacity:.35;cursor:not-allowed;transform:none}
+/* Transaction history */
+.tx-item{display:flex;align-items:center;gap:9px;padding:7px 0;border-bottom:1px solid var(--border)}
+.tx-item:last-child{border-bottom:none}
+.tx-icon{font-size:1.1rem;flex-shrink:0}
+.tx-info{flex:1}
+.tx-info p{font-size:.78rem;color:var(--text2)}
+.tx-info span{font-size:.64rem;color:var(--text3)}
+.tx-amt{font-weight:700;font-size:.82rem}
+.tx-amt.sent{color:var(--neon-pink)}
+.tx-amt.recv{color:var(--neon-green)}
 .study-card{background:var(--bg3);border:1px solid rgba(74,222,128,.2);border-radius:14px;padding:16px 18px;margin-bottom:16px;display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
 .study-card-info h3{font-size:.88rem;font-weight:700;margin-bottom:3px}
 .study-card-info p{font-size:.75rem;color:var(--text2)}
@@ -964,6 +1037,82 @@ input,textarea,select{font-family:inherit}
               <h3>💡 How to Earn Class Coins</h3>
               <div class="earn-item"><span class="ei-icon">📖</span><div class="ei-info"><p>Study for 30 minutes</p><span>Use the Study Timer above</span></div><span class="ei-coins">+100 🪙</span></div>
               <div class="earn-item"><span class="ei-icon">📋</span><div class="ei-info"><p>Submit homework</p><span>Submit an assignment on the board</span></div><span class="ei-coins">+50 🪙</span></div>
+            </div>
+            <!-- ── COIN TRANSFER / BANK ── -->
+            <div class="transfer-card">
+              <div class="transfer-header">
+                <span class="transfer-icon">🏦</span>
+                <div>
+                  <h3>Send Coins</h3>
+                  <p>Transfer class coins to any classmate</p>
+                </div>
+              </div>
+              <div class="transfer-body">
+                <div class="transfer-balance-row">
+                  <span class="transfer-bal-label">Your Balance</span>
+                  <span class="transfer-bal-val" id="transferBal">0 🪙</span>
+                </div>
+                <div class="transfer-fields">
+                  <div class="transfer-field">
+                    <label>Send To</label>
+                    <select id="transferTo">
+                      <option value="">— Choose classmate —</option>
+                      <option>Toni Macauly</option>
+                      <option>Oghenetejiri Ogheneochukwu</option>
+                      <option>Joanna Bogoro</option>
+                      <option>Ama-Abasi Benson</option>
+                      <option>Oluyemi Sosan</option>
+                      <option>Aisha Adeniyi</option>
+                      <option>Elissa Ojei</option>
+                      <option>Kwame Sagoe</option>
+                      <option>Oluwafeyikunmi Osunsedo</option>
+                      <option>Olayomade King</option>
+                      <option>Anthonia Celey Okogun</option>
+                      <option>Netochi Anichebe</option>
+                      <option>Ishaq Babalola</option>
+                      <option>Eliora Ighodalo</option>
+                      <option>Oluwanifesimi Thomas</option>
+                      <option>Ereremena Orife</option>
+                      <option>Petnan Fwangkwal</option>
+                      <option>Fareedah Ibrahim</option>
+                      <option>Tamunomiebi Miebaga</option>
+                      <option>Adedamola Egbonwon</option>
+                      <option>Fievaoghene Atebe</option>
+                      <option>Ethan Adeleke</option>
+                      <option>Test Person</option>
+                    </select>
+                  </div>
+                  <div class="transfer-field">
+                    <label>Amount</label>
+                    <div class="transfer-amount-wrap">
+                      <span class="transfer-coin-icon">🪙</span>
+                      <input type="number" id="transferAmount" placeholder="0" min="1" max="1000000"/>
+                    </div>
+                  </div>
+                </div>
+                <!-- Quick amount buttons -->
+                <div class="transfer-quick">
+                  <button class="tq-btn" onclick="setTransferAmt(50)">50</button>
+                  <button class="tq-btn" onclick="setTransferAmt(100)">100</button>
+                  <button class="tq-btn" onclick="setTransferAmt(250)">250</button>
+                  <button class="tq-btn" onclick="setTransferAmt(500)">500</button>
+                  <button class="tq-btn" onclick="setTransferAmt(1000)">1K</button>
+                  <button class="tq-btn tq-max" onclick="setTransferMax()">MAX</button>
+                </div>
+                <!-- Result message -->
+                <div class="transfer-result" id="transferResult" style="display:none"></div>
+                <!-- Send button -->
+                <button class="transfer-send-btn" id="transferSendBtn" onclick="doTransfer()">
+                  💸 Send Coins
+                </button>
+              </div>
+            </div>
+            <!-- ── TRANSACTION HISTORY ── -->
+            <div class="earn-list" id="txHistory" style="margin-bottom:16px">
+              <h3>📜 Recent Transactions</h3>
+              <div id="txList">
+                <div style="font-size:.77rem;color:var(--text3);padding:6px 0">No transactions yet.</div>
+              </div>
             </div>
             <div class="coins-grid">
               <div class="c-card" id="tierCard-pro">
@@ -1551,7 +1700,12 @@ function showSection(name){
   if(name==='dm'){ document.getElementById('sb-dm').classList.remove('has-unread'); }
   if(name==='groups'){ document.getElementById('sb-groups').classList.remove('has-unread'); }
   // refresh coins section
-  if(name==='coins') refreshCoins();
+  if(name==='coins'){
+    refreshCoins();
+    // update transfer balance display
+    const tb=document.getElementById('transferBal');
+    if(tb) tb.textContent=(myProfile.coins||0).toLocaleString()+' 🪙';
+  }
   // refresh settings
   if(name==='settings') renderSettings();
 }
@@ -2436,7 +2590,11 @@ socket.on('premiumError', msg=>{ showToast('⚠️ '+msg); });
 socket.on('studyStarted', ()=>{ showToast('📖 Study session started! Earn 100 coins every 30 mins.'); });
 socket.on('studyStopped', ()=>{ });
 
-function refreshCoins(){ socket.emit('getCoins'); }
+function refreshCoins(){
+  socket.emit('getCoins');
+  const tb=document.getElementById('transferBal');
+  if(tb) tb.textContent=(myProfile.coins||0).toLocaleString()+' 🪙';
+}
 
 function buyTier(tier){
   const costs={pro:500,silver:1000,gold:1500,premium:2000};
@@ -2445,6 +2603,85 @@ function buyTier(tier){
   socket.emit('buyTier',{tier});
 }
 function buyPremium(){ buyTier('premium'); }
+
+// ── COIN TRANSFER ──────────────────────────────────────────────────────────────
+const txLog = [];
+
+function setTransferAmt(n){ const inp=document.getElementById('transferAmount'); if(inp) inp.value=n; }
+function setTransferMax(){ const inp=document.getElementById('transferAmount'); if(inp) inp.value=myProfile.coins||0; }
+
+function doTransfer(){
+  const to  = document.getElementById('transferTo')?.value;
+  const amt = document.getElementById('transferAmount')?.value;
+  const btn = document.getElementById('transferSendBtn');
+  if(!to){ showTransferResult('❌ Please choose a classmate to send to.','error'); return; }
+  if(!amt||Number(amt)<=0){ showTransferResult('❌ Please enter an amount.','error'); return; }
+  if(to===ME){ showTransferResult('❌ You cannot send coins to yourself.','error'); return; }
+  if(Number(amt) > (myProfile.coins||0)){
+    const short = Number(amt)-(myProfile.coins||0);
+    showTransferResult(`❌ Insufficient funds! You need ${short.toLocaleString()} more 🪙.`,'error');
+    return;
+  }
+  if(btn) btn.disabled=true;
+  socket.emit('transferCoins',{ to, amount: Number(amt) });
+}
+
+function showTransferResult(msg, type){
+  const el=document.getElementById('transferResult');
+  if(!el) return;
+  el.textContent=msg;
+  el.className='transfer-result '+(type||'success');
+  el.style.display='';
+  clearTimeout(el._t);
+  el._t=setTimeout(()=>{ el.style.display='none'; },5000);
+}
+
+function addTxItem(icon, text, subtext, amtText, amtClass){
+  txLog.unshift({icon,text,subtext,amtText,amtClass});
+  if(txLog.length>20) txLog.pop();
+  renderTxLog();
+}
+
+function renderTxLog(){
+  const list=document.getElementById('txList');
+  if(!list) return;
+  if(!txLog.length){ list.innerHTML='<div style="font-size:.77rem;color:var(--text3);padding:6px 0">No transactions yet.</div>'; return; }
+  list.innerHTML='';
+  txLog.forEach(tx=>{
+    const div=document.createElement('div');
+    div.className='tx-item';
+    div.innerHTML=`<span class="tx-icon">${tx.icon}</span><div class="tx-info"><p>${tx.text}</p><span>${tx.subtext}</span></div><span class="tx-amt ${tx.amtClass}">${tx.amtText}</span>`;
+    list.appendChild(div);
+  });
+}
+
+socket.on('transferResult',({ok,message,error,newBalance,to,amount})=>{
+  const btn=document.getElementById('transferSendBtn');
+  if(btn) btn.disabled=false;
+  if(ok){
+    showTransferResult(message,'success');
+    myProfile.coins=newBalance;
+    updateCoinUI(newBalance, myProfile.premium||false, myProfile.tier||null);
+    const now=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    addTxItem('💸',`Sent to ${to}`,now,`-${Number(amount).toLocaleString()} 🪙`,'sent');
+    const amtInp=document.getElementById('transferAmount');
+    const toSel=document.getElementById('transferTo');
+    if(amtInp) amtInp.value='';
+    if(toSel) toSel.value='';
+    showToast(`💸 Sent ${Number(amount).toLocaleString()} 🪙 to ${to}!`,'coin-toast');
+  } else {
+    showTransferResult(error||'Transfer failed.','error');
+  }
+});
+
+socket.on('coinsReceived',({from,amount,newBalance,message})=>{
+  myProfile.coins=newBalance;
+  updateCoinUI(newBalance, myProfile.premium||false, myProfile.tier||null);
+  const now=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+  addTxItem('💰',`Received from ${from}`,now,`+${Number(amount).toLocaleString()} 🪙`,'recv');
+  showToast(message,'coin-toast');
+  showTransferResult(message,'success');
+});
 
 // ── Study Timer (client-side clock, server awards coins) ──
 function startStudy(){
