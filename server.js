@@ -150,7 +150,7 @@ function getProfile(name) {
   if (!profileStore[name]) {
     profileStore[name] = {
       avatar: null, bio: '', status: 'online',
-      coins: name === 'Petnan Fwangkwal' ? 100000 : 1000,
+      coins: name === 'Petnan Fwangkwal' ? 100000 : name === 'Test Person' ? 1000 : 0,
       premium: false, tier: null, premiumSince: null,
       studyMinutes: 0,
     };
