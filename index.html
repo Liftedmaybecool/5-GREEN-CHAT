@@ -438,23 +438,42 @@ input,textarea,select{font-family:inherit}
 /* In-message attachment */
 .msg-img{
   max-width:280px;max-height:220px;border-radius:11px;
-  object-fit:cover;display:block;cursor:pointer;margin-top:5px;
-  border:1px solid rgba(0,245,255,.15);transition:opacity .2s;
+  object-fit:cover;display:block;cursor:pointer;
+  border:1px solid rgba(0,245,255,.15);transition:all .2s;
 }
-.msg-img:hover{opacity:.88}
-.msg-video{max-width:280px;border-radius:11px;display:block;margin-top:5px;border:1px solid rgba(0,245,255,.15)}
-.msg-audio{display:block;margin-top:5px;width:100%;max-width:280px;border-radius:8px}
-.msg-file{
-  display:flex;align-items:center;gap:9px;
+.msg-img:hover{opacity:.88;border-color:var(--neon-cyan);box-shadow:0 0 15px rgba(0,245,255,.2)}
+.msg-video{max-width:300px;border-radius:11px;display:block;border:1px solid rgba(0,245,255,.15);background:#000}
+.msg-audio{display:block;width:100%;max-width:300px;border-radius:8px}
+.msg-file-card{
+  display:flex;align-items:center;gap:10px;
   background:rgba(0,245,255,.05);border:1px solid rgba(0,245,255,.15);
-  border-radius:11px;padding:9px 13px;margin-top:5px;cursor:pointer;
-  text-decoration:none;transition:background .2s;max-width:280px;
+  border-radius:11px;padding:10px 14px;max-width:300px;
 }
-.msg-file:hover{background:rgba(0,245,255,.12)}
-.msg-file-icon{font-size:1.5rem;flex-shrink:0}
+.msg-file-icon{font-size:1.6rem;flex-shrink:0}
 .msg-file-info{flex:1;min-width:0}
-.msg-file-name{font-size:.8rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.msg-file-size{font-size:.65rem;color:var(--text3);margin-top:1px}
+.msg-file-name{font-size:.81rem;color:var(--text);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:500}
+.msg-file-size{font-size:.65rem;color:var(--text3);margin-top:2px}
+/* Action row: download + open buttons */
+.att-action-row{
+  display:flex;gap:6px;flex-wrap:wrap;
+}
+.att-dl-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  background:linear-gradient(135deg,rgba(0,245,255,.12),rgba(0,128,255,.12));
+  border:1px solid rgba(0,245,255,.35);border-radius:8px;
+  color:var(--neon-cyan);font-size:.73rem;font-weight:700;
+  padding:5px 12px;cursor:pointer;text-decoration:none;
+  transition:all .2s;box-shadow:0 0 8px rgba(0,245,255,.1);
+}
+.att-dl-btn:hover{background:rgba(0,245,255,.22);box-shadow:0 0 16px rgba(0,245,255,.3);transform:translateY(-1px)}
+.att-open-btn{
+  display:inline-flex;align-items:center;gap:4px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.15);
+  border-radius:8px;color:var(--text2);font-size:.73rem;font-weight:600;
+  padding:5px 12px;cursor:pointer;text-decoration:none;
+  transition:all .2s;
+}
+.att-open-btn:hover{background:rgba(255,255,255,.12);color:var(--text);border-color:rgba(255,255,255,.3)}
 /* Lightbox */
 #lightbox{display:none;position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:1000;align-items:center;justify-content:center;cursor:zoom-out}
 #lightbox.open{display:flex}
@@ -897,12 +916,12 @@ input,textarea,select{font-family:inherit}
             </div>
             <div class="typing-bar" id="studyTyping"></div>
             <div class="input-wrap">
-              <div class="file-preview-strip" id="aiStudyPreview" style="display:none"></div>
+              <div class="file-preview-strip" id="aiPreviewStudy" style="display:none"></div>
               <div class="input-box">
                 <button class="attach-btn" onclick="document.getElementById('studyFile').click()" title="Attach file for AI analysis">📎</button>
                 <input type="file" id="studyFile" style="display:none" multiple
                   accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.txt,.csv"
-                  onchange="previewFiles(this,'ai')"/>
+                  onchange="previewFilesStudy(this)"/>
                 <textarea id="studyInput" placeholder="Ask about any subject, or attach a file to analyse…" rows="1"
                   onkeydown="handleKey(event,'study')" oninput="autoGrow(this)"></textarea>
                 <button class="send-btn" id="studySendBtn" onclick="sendStudyAI()">➤</button>
@@ -1147,6 +1166,7 @@ input,textarea,select{font-family:inherit}
 <!-- LIGHTBOX (full-screen image viewer) -->
 <div id="lightbox" onclick="closeLightbox()">
   <button id="lightbox-close" onclick="closeLightbox()">✕</button>
+  <button id="lightboxDl" onclick="event.stopPropagation()" style="position:absolute;bottom:22px;left:50%;transform:translateX(-50%);background:rgba(0,245,255,.15);border:1px solid rgba(0,245,255,.4);border-radius:10px;color:#00f5ff;padding:9px 22px;font-size:.85rem;font-weight:700;cursor:pointer;z-index:10;backdrop-filter:blur(8px)">⬇ Download Image</button>
   <img id="lightboxImg" src="" alt="Full size image"/>
 </div>
 
@@ -1337,58 +1357,172 @@ function clearPending(channel){
   pendingFiles[channel]=[];
   const strip=document.getElementById(channel+'Preview');
   if(strip){ strip.innerHTML=''; strip.style.display='none'; }
+  // also clear study strip if clearing ai
+  if(channel==='ai'){
+    const s2=document.getElementById('aiPreviewStudy');
+    if(s2){ s2.innerHTML=''; s2.style.display='none'; }
+  }
+}
+
+// previewFilesStudy — same as previewFiles('ai') but shows chips in study strip
+async function previewFilesStudy(input){
+  const files = Array.from(input.files);
+  input.value='';
+  if(!files.length) return;
+  const strip = document.getElementById('aiPreviewStudy');
+  for(const file of files){
+    const ft = classifyFile(file);
+    const pid = 'pf_'+Date.now()+'_'+Math.random().toString(36).slice(2,6);
+    const chip = document.createElement('div');
+    chip.className='fp-item'; chip.id=pid;
+    if(ft==='image'){
+      const thumb = document.createElement('img');
+      thumb.className='fp-img'; thumb.src=URL.createObjectURL(file);
+      chip.appendChild(thumb);
+    } else {
+      const ic = document.createElement('span');
+      ic.className='fp-icon'; ic.textContent=fileIcon(ft);
+      chip.appendChild(ic);
+    }
+    const inf = document.createElement('div');
+    inf.className='fp-info';
+    inf.innerHTML=`<div class="fp-name">${esc(file.name)}</div><div class="fp-size">Uploading…</div>`;
+    chip.appendChild(inf);
+    const rm = document.createElement('button');
+    rm.className='fp-remove'; rm.textContent='✕';
+    rm.onclick=()=>{
+      pendingFiles.ai=pendingFiles.ai.filter(p=>p._pid!==pid);
+      chip.remove();
+      if(strip && strip.children.length===0) strip.style.display='none';
+    };
+    chip.appendChild(rm);
+    if(strip){ strip.style.display='flex'; strip.appendChild(chip); }
+    try{
+      const fd=new FormData(); fd.append('file',file);
+      const res=await fetch('/api/upload-file',{method:'POST',body:fd});
+      const data=await res.json();
+      if(data.url){ data._pid=pid; pendingFiles.ai.push(data); inf.querySelector('.fp-size').textContent=fmtSize(file.size); }
+      else { chip.remove(); showToast('Upload failed: '+file.name); }
+    }catch(e){ chip.remove(); showToast('Upload failed: '+file.name); }
+  }
 }
 
 // ── Build attachment DOM element for a message bubble ───────────────────────
 function buildAttachmentEl(att){
   if(!att||!att.url) return null;
   const ft=att.fileType||'file';
+  const name=att.name||'file';
   const wrap=document.createElement('div');
+  wrap.style.cssText='display:flex;flex-direction:column;gap:5px;margin-top:5px';
+
+  // ── helpers ──────────────────────────────────────────────────────────────
+  // Force-download button that works for same-origin files
+  function makeDownloadBtn(label){
+    const btn=document.createElement('a');
+    btn.href=att.url;
+    btn.download=name;
+    btn.className='att-dl-btn';
+    btn.innerHTML=label||'⬇ Download';
+    btn.addEventListener('click', e=>{
+      // If browser opens inline instead of downloading, force via fetch+blob
+      e.preventDefault();
+      fetch(att.url)
+        .then(r=>r.blob())
+        .then(blob=>{
+          const burl=URL.createObjectURL(blob);
+          const a2=document.createElement('a');
+          a2.href=burl; a2.download=name;
+          document.body.appendChild(a2); a2.click();
+          setTimeout(()=>{ URL.revokeObjectURL(burl); a2.remove(); },1000);
+        })
+        .catch(()=>{ window.open(att.url,'_blank'); });
+    });
+    return btn;
+  }
 
   if(ft==='image'){
+    // Inline preview + download button below
     const img=document.createElement('img');
-    img.className='msg-img'; img.src=att.url; img.alt=att.name||'image';
-    img.onclick=()=>openLightbox(att.url);
+    img.className='msg-img'; img.src=att.url; img.alt=name;
+    img.onclick=()=>openLightbox(att.url, name);
     wrap.appendChild(img);
+    // download row
+    const row=document.createElement('div');
+    row.className='att-action-row';
+    const dlBtn=makeDownloadBtn('⬇ Download image');
+    const openBtn=document.createElement('a');
+    openBtn.href=att.url; openBtn.target='_blank';
+    openBtn.className='att-open-btn'; openBtn.textContent='🔍 Full size';
+    row.appendChild(dlBtn); row.appendChild(openBtn);
+    wrap.appendChild(row);
+
   } else if(ft==='video'){
     const vid=document.createElement('video');
     vid.className='msg-video'; vid.src=att.url;
     vid.controls=true; vid.preload='metadata';
-    vid.style.maxWidth='300px';
     wrap.appendChild(vid);
+    const row=document.createElement('div');
+    row.className='att-action-row';
+    row.appendChild(makeDownloadBtn('⬇ Download video'));
+    wrap.appendChild(row);
+
   } else if(ft==='audio'){
     const aud=document.createElement('audio');
-    aud.className='msg-audio'; aud.src=att.url;
-    aud.controls=true;
+    aud.className='msg-audio'; aud.src=att.url; aud.controls=true;
     wrap.appendChild(aud);
-  } else if(ft==='pdf'){
-    const a=document.createElement('a');
-    a.className='msg-file'; a.href=att.url; a.target='_blank';
-    a.innerHTML=`<span class="msg-file-icon">📄</span>
-      <div class="msg-file-info">
-        <div class="msg-file-name">${esc(att.name||'Document')}</div>
-        <div class="msg-file-size">${fmtSize(att.size||0)} · PDF · Click to open</div>
-      </div>`;
-    wrap.appendChild(a);
+    const row=document.createElement('div');
+    row.className='att-action-row';
+    row.appendChild(makeDownloadBtn('⬇ Download audio'));
+    wrap.appendChild(row);
+
   } else {
-    const a=document.createElement('a');
-    a.className='msg-file'; a.href=att.url; a.target='_blank'; a.download=att.name||'file';
-    a.innerHTML=`<span class="msg-file-icon">${fileIcon(ft)}</span>
+    // PDF, Word, Excel, zip, txt, or any other file — show a card
+    const icons={pdf:'📄',file:'📎'};
+    const typeLabel={pdf:'PDF · Click to open',file:'File'}[ft]||ft.toUpperCase();
+    const card=document.createElement('div');
+    card.className='msg-file-card';
+    card.innerHTML=`
+      <span class="msg-file-icon">${fileIcon(ft)}</span>
       <div class="msg-file-info">
-        <div class="msg-file-name">${esc(att.name||'File')}</div>
-        <div class="msg-file-size">${fmtSize(att.size||0)} · Download</div>
+        <div class="msg-file-name">${esc(name)}</div>
+        <div class="msg-file-size">${fmtSize(att.size||0)} · ${esc(typeLabel)}</div>
       </div>`;
-    wrap.appendChild(a);
+    wrap.appendChild(card);
+    const row=document.createElement('div');
+    row.className='att-action-row';
+    // View/open button
+    const openBtn=document.createElement('a');
+    openBtn.href=att.url; openBtn.target='_blank';
+    openBtn.className='att-open-btn';
+    openBtn.textContent= ft==='pdf' ? '👁 View PDF' : '👁 Open';
+    row.appendChild(openBtn);
+    // Download button
+    row.appendChild(makeDownloadBtn('⬇ Download'));
+    wrap.appendChild(row);
   }
   return wrap;
 }
 
 // ── Lightbox ─────────────────────────────────────────────────────────────────
-function openLightbox(url){
+function openLightbox(url, name){
   const lb=document.getElementById('lightbox');
   const img=document.getElementById('lightboxImg');
+  const dlBtn=document.getElementById('lightboxDl');
   if(!lb||!img) return;
-  img.src=url; lb.classList.add('open');
+  img.src=url;
+  if(dlBtn){
+    dlBtn.onclick=(e)=>{
+      e.stopPropagation();
+      fetch(url).then(r=>r.blob()).then(blob=>{
+        const burl=URL.createObjectURL(blob);
+        const a=document.createElement('a');
+        a.href=burl; a.download=name||'image';
+        document.body.appendChild(a); a.click();
+        setTimeout(()=>{ URL.revokeObjectURL(burl); a.remove(); },1000);
+      }).catch(()=>window.open(url,'_blank'));
+    };
+  }
+  lb.classList.add('open');
 }
 function closeLightbox(){
   const lb=document.getElementById('lightbox');
