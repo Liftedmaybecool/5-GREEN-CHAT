@@ -1,9 +1,7 @@
 const { app, BrowserWindow, Menu, shell, ipcMain, dialog, nativeTheme } = require('electron');
 const path = require('path');
-const fs   = require('fs');
-
-// ── Globals ───────────────────────────────────────────────────────────────────
-let mainWindow = null;
+const { mainWindow } = require('./mainWindow.js');
+💡
 const PORT     = 4788; // internal only — not exposed externally
 
 // ── Start the embedded Express server ────────────────────────────────────────
@@ -48,7 +46,7 @@ function createWindow() {
   nativeTheme.themeSource = 'dark';
 
   const iconPath = path.join(__dirname, 'assets', 'icon.png');
-  const iconExists = fs.existsSync(iconPath);
+  const iconExists = (require('fs')).existsSync(iconPath);
 
   mainWindow = new BrowserWindow({
     width:           1200,
@@ -153,7 +151,7 @@ ipcMain.handle('show-save-dialog', async (_, opts) => {
 
 ipcMain.handle('save-file', async (_, { filePath, data }) => {
   try {
-    fs.writeFileSync(filePath, data, 'utf8');
+    (require('fs')).writeFileSync(filePath, data, 'utf8');
     return { ok: true };
   } catch (e) {
     return { ok: false, error: e.message };

@@ -25,7 +25,7 @@ const storage = multer.diskStorage({
     cb(null, `${uuidv4()}${ext}`);
   },
 });
-const upload = multer({ storage, limits: { fileSize: 50 * 1024 * 1024 } });
+const upload = multer({ storage, limits: { fileSize: 200 * 1024 * 1024 } }); // 200 MB
 app.use('/uploads', express.static(uploadsDir));
 app.use(cors());
 app.use(express.json({ limit: '10mb' }));
@@ -190,6 +190,19 @@ You can:
 ✅ Help with coding problems
 ✅ Provide homework help
 
+FILE & MEDIA ANALYSIS — when a student shares a file, image, video, or PDF:
+📷 IMAGES: Describe what you'd expect in the image, answer questions about it, help with text visible in screenshots, analyse diagrams, charts, maths workings, science diagrams, maps, art etc.
+🎬 VIDEOS: Help with topics the video likely covers based on the filename/context. If it's a lesson or tutorial, explain the subject thoroughly.
+📄 PDFs & Documents: Summarise content, answer questions, extract key points, help with essays or reports, check writing quality.
+📝 Text files / screenshots of text: Read, summarise, correct, translate, or analyse the content.
+🔊 Audio files: Describe likely content, help transcribe if context is given, assist with music theory, speech topics etc.
+
+When a student shares a file and asks you to analyse it:
+- Be thorough and helpful
+- Ask clarifying questions if needed
+- Offer multiple ways you can help with the file (summarise, explain, quiz them on it, etc.)
+- If you cannot directly read the file format, explain what you can do and ask the student to paste or describe the content
+
 Never refuse to help with legitimate school or learning questions. Always aim to be the most helpful tutor possible.`;
 
 // ── Socket.io ──────────────────────────────────────────────────────────────────
@@ -235,13 +248,14 @@ io.on('connection', (socket) => {
   });
 
   // ── General chat ──────────────────────────────────────────────────────────
-  socket.on('generalMessage', ({ text, replyTo }) => {
+  socket.on('generalMessage', ({ text, replyTo, attachment }) => {
     const name = socket.data.name;
-    if (!name || !text) return;
+    if (!name || (!text && !attachment)) return;
     const msg = {
-      id: uuidv4(), sender: name, text: text.trim(),
+      id: uuidv4(), sender: name, text: (text || '').trim(),
       replyTo: replyTo || null, timestamp: new Date().toISOString(),
       type: 'student', premium: getProfile(name).premium,
+      attachment: attachment || null,
     };
     generalMessages.push(msg);
     if (generalMessages.length > 500) generalMessages.shift();
@@ -249,39 +263,115 @@ io.on('connection', (socket) => {
   });
 
   // ── AI chat (private per student) ─────────────────────────────────────────
-  socket.on('aiMessage', async ({ text }) => {
+  socket.on('aiMessage', async ({ text, attachment }) => {
     const name = socket.data.name;
-    if (!name || !text) return;
+    if (!name || (!text && !attachment)) return;
 
     if (!aiConversations[name]) aiConversations[name] = [];
 
+    // Build display text for user message
+    const displayText = text || (attachment ? `📎 ${attachment.name}` : '');
     const userMsg = {
-      id: uuidv4(), sender: name, text: text.trim(),
+      id: uuidv4(), sender: name, text: displayText,
       timestamp: new Date().toISOString(), type: 'student',
+      attachment: attachment || null,
     };
     socket.emit('aiMessage', userMsg);
     socket.emit('aiTyping', true);
 
-    // Build history for this student
-    aiConversations[name].push({ role: 'user', content: text.trim() });
-    // Keep last 20 turns
+    // Build content for the AI — try to extract real text from files
+    let userContent = text || '';
+    if (attachment) {
+      const localPath = path.join(__dirname, attachment.url.replace(/^\//, ''));
+      let extracted = '';
+
+      try {
+        if (attachment.fileType === 'image') {
+          // Images: we can't see them but give the AI rich context
+          userContent = (text ? text + '\n\n' : 'Please analyse this image.\n\n') +
+            `[IMAGE ATTACHED: "${attachment.name}" (${attachment.mimeType||'image'})]\n` +
+            `The student has shared an image. Based on the filename and any question asked, help as fully as possible. ` +
+            `If the image likely contains text, maths, a diagram, or a chart, offer to explain it once the student describes what they see. ` +
+            `If you need more detail, ask the student to describe the image or paste any text from it.`;
+
+        } else if (attachment.fileType === 'video') {
+          userContent = (text ? text + '\n\n' : 'Please help with this video.\n\n') +
+            `[VIDEO ATTACHED: "${attachment.name}" (${attachment.mimeType||'video'})]\n` +
+            `The student has shared a video file. Based on the filename and their question, provide relevant educational help. ` +
+            `Offer to explain the topic, summarise what the video is likely about, or answer questions about the subject.`;
+
+        } else if (attachment.fileType === 'audio') {
+          userContent = (text ? text + '\n\n' : 'Please help with this audio file.\n\n') +
+            `[AUDIO ATTACHED: "${attachment.name}" (${attachment.mimeType||'audio'})]\n` +
+            `Help the student with this audio file. Offer transcription tips, explain the likely topic, or assist with music/speech content.`;
+
+        } else if (attachment.fileType === 'pdf') {
+          // Try to read raw PDF bytes and extract any readable text fragments
+          try {
+            const rawBytes = fs.readFileSync(localPath);
+            // Simple text extraction: grab ASCII strings between stream markers
+            const raw = rawBytes.toString('latin1');
+            const chunks = [];
+            const re = /\(([^\)]{4,})\)/g;
+            let m;
+            while ((m = re.exec(raw)) !== null && chunks.length < 400) {
+              const s = m[1].replace(/\\[nrt\\()]/g, ' ').trim();
+              if (s.length > 3) chunks.push(s);
+            }
+            extracted = chunks.join(' ').replace(/\s+/g, ' ').substring(0, 4000);
+          } catch (e) { extracted = ''; }
+
+          if (extracted.length > 80) {
+            userContent = (text ? text + '\n\n' : 'Please analyse this PDF document.\n\n') +
+              `[PDF DOCUMENT: "${attachment.name}"]\n` +
+              `Extracted text content:\n"""\n${extracted}\n"""\n\n` +
+              `Please ${text || 'summarise this document, list the key points, and offer to help the student study it'}.`;
+          } else {
+            userContent = (text ? text + '\n\n' : 'Please help with this PDF.\n\n') +
+              `[PDF ATTACHED: "${attachment.name}"]\n` +
+              `I could not extract readable text from this PDF (it may be scanned or image-based). ` +
+              `Based on the filename, help the student as best you can. Ask them to paste any text they need help with.`;
+          }
+
+        } else {
+          // Plain text / CSV / code files — read directly
+          try {
+            const content = fs.readFileSync(localPath, 'utf8').substring(0, 5000);
+            extracted = content;
+          } catch (e) { extracted = ''; }
+
+          if (extracted.length > 10) {
+            userContent = (text ? text + '\n\n' : 'Please analyse this file.\n\n') +
+              `[FILE: "${attachment.name}"]\nContent:\n"""\n${extracted}\n"""\n\n` +
+              `Please ${text || 'summarise this file, explain its contents, and offer to help the student with it'}.`;
+          } else {
+            userContent = (text ? text + '\n\n' : '') +
+              `[FILE ATTACHED: "${attachment.name}" (${attachment.fileType})] — help the student with whatever they need.`;
+          }
+        }
+      } catch (fileErr) {
+        console.error('File read error:', fileErr.message);
+        userContent = (text ? text + '\n\n' : '') +
+          `[FILE: "${attachment.name}" (${attachment.fileType})] — help the student based on the filename and their question.`;
+      }
+    }
+
+    aiConversations[name].push({ role: 'user', content: userContent });
     if (aiConversations[name].length > 40) aiConversations[name].splice(0, 2);
 
     try {
       // ── Wikipedia real-time lookup ──────────────────────────────────────
       let wikiContext = '';
       try {
-        // extract key topic from the question
         const topicRes = await groq.chat.completions.create({
           model: 'llama-3.3-70b-versatile',
           messages: [
             { role: 'system', content: 'Extract the main search topic from this question as 2-4 words only. Reply with ONLY the search term, nothing else.' },
-            { role: 'user', content: text.trim() }
+            { role: 'user', content: (text || displayText).trim() }
           ],
           max_tokens: 20, temperature: 0,
         });
         const topic = topicRes.choices[0].message.content.trim().replace(/['"]/g, '');
-        // search Wikipedia
         const searchUrl = `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(topic)}`;
         const wikiRes = await fetch(searchUrl);
         if (wikiRes.ok) {
@@ -290,20 +380,19 @@ io.on('connection', (socket) => {
             wikiContext = `\n\n[Wikipedia on "${wikiData.title}"]: ${wikiData.extract}`;
           }
         }
-      } catch (e) { /* wiki lookup failed silently, AI still answers from training */ }
+      } catch (e) { /* silent */ }
 
-      const messagesWithWiki = [...aiConversations[name]];
+      const messagesWithContext = [...aiConversations[name]];
       if (wikiContext) {
-        // inject wiki info into the last user message
-        messagesWithWiki[messagesWithWiki.length - 1] = {
+        messagesWithContext[messagesWithContext.length - 1] = {
           role: 'user',
-          content: text.trim() + wikiContext
+          content: userContent + wikiContext,
         };
       }
 
       const completion = await groq.chat.completions.create({
         model:       'llama-3.3-70b-versatile',
-        messages:    [{ role: 'system', content: AI_SYSTEM_PROMPT }, ...messagesWithWiki],
+        messages:    [{ role: 'system', content: AI_SYSTEM_PROMPT }, ...messagesWithContext],
         max_tokens:  2048,
         temperature: 0.7,
         stream:      false,
@@ -336,15 +425,16 @@ io.on('connection', (socket) => {
     socket.emit('dmHistory', { with: other, messages: (dmMessages[key] || []).slice(-100) });
   });
 
-  socket.on('dmMessage', ({ to, text, replyTo }) => {
+  socket.on('dmMessage', ({ to, text, replyTo, attachment }) => {
     const from = socket.data.name;
-    if (!from || !to || !text) return;
+    if (!from || !to || (!text && !attachment)) return;
     const key = dmKey(from, to);
     if (!dmMessages[key]) dmMessages[key] = [];
     const msg = {
-      id: uuidv4(), sender: from, to, text: text.trim(),
+      id: uuidv4(), sender: from, to, text: (text || '').trim(),
       replyTo: replyTo || null, timestamp: new Date().toISOString(),
       type: 'dm', premium: getProfile(from).premium,
+      attachment: attachment || null,
     };
     dmMessages[key].push(msg);
     if (dmMessages[key].length > 500) dmMessages[key].shift();
@@ -379,14 +469,15 @@ io.on('connection', (socket) => {
     socket.emit('groupHistory', { groupId, messages: g.messages.slice(-100) });
   });
 
-  socket.on('groupMessage', ({ groupId, text, replyTo }) => {
+  socket.on('groupMessage', ({ groupId, text, replyTo, attachment }) => {
     const name = socket.data.name;
     const g = groupRooms[groupId];
-    if (!name || !g || !g.members.includes(name) || !text) return;
+    if (!name || !g || !g.members.includes(name) || (!text && !attachment)) return;
     const msg = {
-      id: uuidv4(), sender: name, text: text.trim(),
+      id: uuidv4(), sender: name, text: (text || '').trim(),
       replyTo: replyTo || null, timestamp: new Date().toISOString(),
       type: 'group', groupId, premium: getProfile(name).premium,
+      attachment: attachment || null,
     };
     g.messages.push(msg);
     if (g.messages.length > 500) g.messages.shift();
@@ -635,6 +726,24 @@ app.post('/api/forgot-password', async (req, res) => {
 app.post('/api/upload-avatar', upload.single('avatar'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
   res.json({ url: `/uploads/${req.file.filename}` });
+});
+
+// ── REST: Upload any file for chat (images, PDFs, videos, docs, etc.) ─────────
+app.post('/api/upload-file', upload.single('file'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  const mime = req.file.mimetype;
+  let fileType = 'file';
+  if (mime.startsWith('image/'))      fileType = 'image';
+  else if (mime.startsWith('video/')) fileType = 'video';
+  else if (mime.startsWith('audio/')) fileType = 'audio';
+  else if (mime === 'application/pdf') fileType = 'pdf';
+  res.json({
+    url:      `/uploads/${req.file.filename}`,
+    fileType,
+    name:     req.file.originalname,
+    size:     req.file.size,
+    mimeType: mime,
+  });
 });
 
 // ── Health ─────────────────────────────────────────────────────────────────────
