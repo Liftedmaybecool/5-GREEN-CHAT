@@ -88,10 +88,10 @@ const STUDY_INTERVAL_MS = 30 * 60 * 1000;
 
 // ── Tier costs ────────────────────────────────────────────────────────────────
 const TIERS = {
-  pro:     { cost: 500,  label: '5G Pro',    color: '#60a5fa', emoji: '🔵' },
-  silver:  { cost: 1000, label: '5G Silver', color: '#94a3b8', emoji: '🩶' },
-  gold:    { cost: 1500, label: '5G Gold',   color: '#f59e0b', emoji: '🥇' },
-  premium: { cost: 2000, label: '5G Premium',color: '#fbbf24', emoji: '⭐' },
+  pro:     { cost: 500,  label: 'CM Pro',    color: '#60a5fa', emoji: '🔵' },
+  silver:  { cost: 1000, label: 'CM Silver', color: '#94a3b8', emoji: '🩶' },
+  gold:    { cost: 1500, label: 'CM Gold',   color: '#f59e0b', emoji: '🥇' },
+  premium: { cost: 2000, label: 'CM Premium',color: '#fbbf24', emoji: '⭐' },
 };
 
 function startStudySession(name, socket) {
@@ -142,20 +142,20 @@ if (process.env.EMAIL_USER && process.env.EMAIL_PASS) {
 }
 
 async function sendForgotPasswordEmail(fromName, message) {
-  const body = `5 GREEN CHAT — Forgot Password Request\n--------------------------------------\nFrom: ${fromName}\nMessage: ${message}\nTime: ${new Date().toLocaleString()}\n\nPlease reply to this student with their password.`;
+  const body = `CLASSMATES CHAT — Forgot Password Request\n--------------------------------------\nFrom: ${fromName}\nMessage: ${message}\nTime: ${new Date().toLocaleString()}\n\nPlease reply to this student with their password.`;
   console.log('\n📧 Forgot Password Request:\n', body);
   if (mailer) {
     await mailer.sendMail({
       from:    process.env.EMAIL_USER,
       to:      'petnan2016@gmail.com',
-      subject: `[5 Green Chat] Password Help — ${fromName}`,
+      subject: `[Classmates Chat] Password Help — ${fromName}`,
       text:    body,
     });
   }
 }
 
 // ── AI system prompt ───────────────────────────────────────────────────────────
-const AI_SYSTEM_PROMPT = `You are 5 GREEN AI — the brilliant, all-knowing AI assistant of 5 Green Chat, built for 5 Green class students.
+const AI_SYSTEM_PROMPT = `You are Classmates AI — the brilliant, all-knowing AI assistant of Classmates Chat, built for 5 Green class students.
 
 You are extraordinarily intelligent and knowledgeable across ALL subjects and domains:
 • Mathematics (arithmetic, algebra, geometry, calculus, statistics)
@@ -176,7 +176,7 @@ Your personality:
 • Honest: if something is beyond your training data, you say so
 • Age-appropriate: you speak at the right level for school students
 
-Your creator is Petnan Fwangkwal, the AI Creator of 5 Green Chat.
+Your creator is Petnan Fwangkwal, the AI Creator of Classmates Chat.
 
 You can:
 ✅ Solve maths problems step-by-step
@@ -401,7 +401,7 @@ io.on('connection', (socket) => {
       aiConversations[name].push({ role: 'assistant', content: reply });
 
       const aiMsg = {
-        id: uuidv4(), sender: '5 GREEN AI', text: reply,
+        id: uuidv4(), sender: 'Classmates AI', text: reply,
         timestamp: new Date().toISOString(), type: 'ai',
       };
       socket.emit('aiTyping', false);
@@ -410,7 +410,7 @@ io.on('connection', (socket) => {
       console.error('AI error:', err.message);
       socket.emit('aiTyping', false);
       socket.emit('aiMessage', {
-        id: uuidv4(), sender: '5 GREEN AI', type: 'ai',
+        id: uuidv4(), sender: 'Classmates AI', type: 'ai',
         text: '⚠️ Sorry, I had a little trouble with that. Please try again in a moment!',
         timestamp: new Date().toISOString(),
       });
@@ -754,7 +754,7 @@ app.get('*', (req, res) => res.sendFile(path.join(__dirname, 'index.html')));
 
 const PORT = process.env.PORT || 3000;
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`\n🟢 5 Green Chat running at http://0.0.0.0:${PORT}\n`);
+  console.log(`\n🟢 Classmates Chat running at http://0.0.0.0:${PORT}\n`);
   console.log(`📚 ${STUDENTS.length} students registered`);
   console.log(`🪙 Coins: ${COINS_PER_30MIN} per 30min study | Pro:500 Silver:1000 Gold:1500 Premium:2000\n`);
 });

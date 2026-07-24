@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>5 Green Chat</title>
+<title>Classmates Chat</title>
 <script src="/socket.io/socket.io.js"></script>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Inter:wght@300;400;500;600;700&display=swap');
@@ -637,8 +637,8 @@ input,textarea,select{font-family:inherit}
 
 <!-- ═══ LOGIN SCREEN ═══ -->
 <div id="loginScreen">
-  <div class="logo-row"><span class="logo-icon">🟢</span><span class="logo-text">5 GREEN CHAT</span></div>
-  <div class="logo-sub">5 Green Communication Platform</div>
+  <div class="logo-row"><span class="logo-icon">🟢</span><span class="logo-text">CLASSMATES CHAT</span></div>
+  <div class="logo-sub">Classmates Communication Platform</div>
   <div class="login-card">
     <h2>Welcome back 👋  Sign in to continue</h2>
     <div class="fg">
@@ -665,7 +665,7 @@ input,textarea,select{font-family:inherit}
     <div class="login-err" id="loginErr"></div>
     <button class="login-btn" onclick="doLogin()">Sign In →</button>
     <button class="forgot-btn" onclick="openForgot()">Forgot Password? Ask Petnan</button>
-    <div class="login-footer">🟢 5 Green Chat — Only for 5 Green students · Powered by 5 GREEN AI</div>
+    <div class="login-footer">🟢 Classmates Chat — Only for 5 Green students · Powered by Classmates AI</div>
   </div>
 </div>
 
@@ -675,7 +675,7 @@ input,textarea,select{font-family:inherit}
   <div class="topbar">
     <div class="topbar-left">
       <span style="font-size:1.05rem">🟢</span>
-      <span class="tb-logo">5 GREEN CHAT</span>
+      <span class="tb-logo">CLASSMATES CHAT</span>
       <span class="tb-badge">5 Green</span>
       <span class="pm-badge" id="pmBadge">⭐ PREMIUM</span>
     </div>
@@ -693,7 +693,7 @@ input,textarea,select{font-family:inherit}
       <div class="sw"><button class="sb-btn" id="sb-dm" onclick="showSection('dm')">✉️<span class="sb-dot"></span></button><span class="tip">Direct Messages</span></div>
       <div class="sw"><button class="sb-btn" id="sb-groups" onclick="showSection('groups')">👥<span class="sb-dot"></span></button><span class="tip">Groups</span></div>
       <div class="sb-div"></div>
-      <div class="sw"><button class="sb-btn ai-sb-btn" id="sb-ai" onclick="showSection('ai')" style="background:linear-gradient(135deg,#29b908,#07c851);border-color:rgba(167,139,250,.5);box-shadow:0 0 10px rgba(167,139,250,.3)">🤖</button><span class="tip">5 GREEN AI</span></div>
+      <div class="sw"><button class="sb-btn ai-sb-btn" id="sb-ai" onclick="showSection('ai')" style="background:linear-gradient(135deg,#29b908,#07c851);border-color:rgba(167,139,250,.5);box-shadow:0 0 10px rgba(167,139,250,.3)">🤖</button><span class="tip">Classmates AI</span></div>
       <div class="sb-div"></div>
       <div class="sw"><button class="sb-btn" id="sb-homework" onclick="showSection('homework')">📚</button><span class="tip">Homework & Study</span></div>
       <div class="sw"><button class="sb-btn" id="sb-coins" onclick="showSection('coins')">🪙</button><span class="tip">Class Coins</span></div>
@@ -726,13 +726,13 @@ input,textarea,select{font-family:inherit}
           <div class="panel-hdr">
             <div style="display:flex;align-items:center;gap:9px;margin-bottom:4px">
               <div style="width:32px;height:32px;border-radius:50%;background:linear-gradient(135deg,#4c1d95,#7c3aed,#a78bfa);display:flex;align-items:center;justify-content:center;font-size:.9rem;box-shadow:0 0 8px rgba(167,139,250,.4);flex-shrink:0">🤖</div>
-              <h3 style="margin:0">5 GREEN AI</h3>
+              <h3 style="margin:0">Classmates AI</h3>
             </div>
             <p>Your super-smart tutor</p>
           </div>
           <div class="panel-body">
             <div class="p-sec">AI ASSISTANT</div>
-            <div class="p-item active"><span class="pi">🤖</span><span class="pn">5 GREEN AI</span></div>
+            <div class="p-item active"><span class="pi">🤖</span><span class="pn">Classmates AI</span></div>
           </div>
         </div>
         <div id="pnl-homework" style="display:none">
@@ -748,7 +748,7 @@ input,textarea,select{font-family:inherit}
           <div class="panel-body">
             <div class="p-sec">MENU</div>
             <div class="p-item active"><span class="pi">🪙</span><span class="pn">My Coins</span></div>
-            <div class="p-item" onclick="showSection('coins')"><span class="pi">⭐</span><span class="pn">5G Premium</span></div>
+            <div class="p-item" onclick="showSection('coins')"><span class="pi">⭐</span><span class="pn">CM Premium</span></div>
           </div>
         </div>
         <div id="pnl-settings" style="display:none">
@@ -861,14 +861,14 @@ input,textarea,select{font-family:inherit}
           <div class="chat-hdr">
             <div class="chat-hdr-l">
               <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#4c1d95,#7c3aed,#a78bfa);border:2px solid rgba(167,139,250,.5);display:flex;align-items:center;justify-content:center;font-size:1.15rem;box-shadow:0 0 12px rgba(167,139,250,.4);flex-shrink:0">🤖</div>
-              <div><h2>5 GREEN AI</h2><p>All-knowing · Super-smart · Always helpful</p></div>
+              <div><h2>Classmates AI</h2><p>All-knowing · Super-smart · Always helpful</p></div>
             </div>
             <button class="hdr-btn" onclick="clearAIChat()">🗑 Clear</button>
           </div>
           <div class="messages" id="aiMsgs">
             <div id="aiWelcome" style="text-align:center;padding:36px 20px;color:var(--text3);max-width:480px;margin:0 auto">
               <div style="width:90px;height:90px;border-radius:50%;background:linear-gradient(135deg,#4c1d95,#7c3aed,#a78bfa);margin:0 auto 16px;display:flex;align-items:center;justify-content:center;font-size:2.8rem;box-shadow:0 0 30px rgba(167,139,250,.5);border:3px solid rgba(167,139,250,.4)">🤖</div>
-              <h3 style="color:var(--purple);margin-bottom:7px;font-size:1.05rem">Hello! I'm 5 GREEN AI</h3>
+              <h3 style="color:var(--purple);margin-bottom:7px;font-size:1.05rem">Hello! I'm Classmates AI</h3>
               <p style="font-size:.82rem;line-height:1.7;color:var(--text2)">I know everything — maths, science, English, history, coding, and more. Ask me anything! Created by <strong style="color:var(--accent)">Petnan Fwangkwal</strong>.</p>
               <div style="display:flex;flex-wrap:wrap;gap:6px;justify-content:center;margin-top:15px">
                 <button class="hdr-btn" onclick="aiQuick('Help me with my homework')">📖 Homework help</button>
@@ -888,7 +888,7 @@ input,textarea,select{font-family:inherit}
               <input type="file" id="aiFile" style="display:none" multiple
                 accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.txt,.csv,.xls,.xlsx,.ppt,.pptx,.zip"
                 onchange="previewFiles(this,'ai')"/>
-              <textarea id="aiInput" placeholder="Ask 5 GREEN AI anything, or attach a file to analyse…" rows="1"
+              <textarea id="aiInput" placeholder="Ask Classmates AI anything, or attach a file to analyse…" rows="1"
                 onkeydown="handleKey(event,'ai')" oninput="autoGrow(this)"></textarea>
               <button class="send-btn" id="aiSendBtn" onclick="sendAI()">➤</button>
             </div>
@@ -907,11 +907,11 @@ input,textarea,select{font-family:inherit}
             </div>
           </div>
           <div id="hw-tab-study" style="display:none;flex:1;flex-direction:column;overflow:hidden">
-            <div class="chat-hdr"><div class="chat-hdr-l"><div><h2>🧠 AI Study Help</h2><p>Ask 5 GREEN AI about any subject or assignment</p></div></div></div>
+            <div class="chat-hdr"><div class="chat-hdr-l"><div><h2>🧠 AI Study Help</h2><p>Ask Classmates AI about any subject or assignment</p></div></div></div>
             <div class="messages" id="studyMsgs">
               <div id="studyWelcome" style="text-align:center;padding:30px 20px;color:var(--text3)">
                 <div style="font-size:2rem;margin-bottom:9px">🧠</div>
-                <p style="font-size:.83rem;color:var(--text2)">Ask 5 GREEN AI anything about your studies!</p>
+                <p style="font-size:.83rem;color:var(--text2)">Ask Classmates AI anything about your studies!</p>
               </div>
             </div>
             <div class="typing-bar" id="studyTyping"></div>
@@ -936,7 +936,7 @@ input,textarea,select{font-family:inherit}
             <div class="coins-hero">
               <div class="big-coin">🪙</div>
               <h2 id="heroCoins">0 Class Coins</h2>
-              <p>Earn coins by studying. Spend them on 5G Premium!</p>
+              <p>Earn coins by studying. Spend them on CM Premium!</p>
               <div class="cprog-wrap">
                 <div class="cprog-lbl"><span>Progress to Premium</span><span id="progPct">0%</span></div>
                 <div class="cprog-bar"><div class="cprog-fill" id="progFill" style="width:0%"></div></div>
@@ -967,31 +967,31 @@ input,textarea,select{font-family:inherit}
             <div class="coins-grid">
               <div class="c-card" id="tierCard-pro">
                 <div style="font-size:2.3rem;margin-bottom:9px">🔵</div>
-                <h3>5G Pro</h3>
-                <p>Blue name colour, 🔵 Pro badge — great for getting started!People like Ereremena🤣</p>
+                <h3>CM Pro</h3>
+                <p>Blue name colour, 🔵 Pro badge — great for getting started! People like Ereremena🤣</p>
                 <div class="c-price">500 🪙</div>
-                <button class="c-buy" id="tierBtn-pro" onclick="buyTier('pro')">Get 5G Pro</button>
+                <button class="c-buy" id="tierBtn-pro" onclick="buyTier('pro')">Get CM Pro</button>
               </div>
               <div class="c-card" id="tierCard-silver">
                 <div style="font-size:2.3rem;margin-bottom:9px">🩶</div>
-                <h3>5G Silver</h3>
-                <p>Silver name colour, 🩶 Silver badge — stand out from the crowd!For people like Yomade😀</p>
+                <h3>CM Silver</h3>
+                <p>Silver name colour, 🩶 Silver badge — stand out from the crowd! For people like Yomade😀</p>
                 <div class="c-price">1,000 🪙</div>
-                <button class="c-buy" id="tierBtn-silver" onclick="buyTier('silver')">Get 5G Silver</button>
+                <button class="c-buy" id="tierBtn-silver" onclick="buyTier('silver')">Get CM Silver</button>
               </div>
               <div class="c-card" id="tierCard-gold">
                 <div style="font-size:2.3rem;margin-bottom:9px">🥇</div>
-                <h3>5G Gold</h3>
+                <h3>CM Gold</h3>
                 <p>Golden name colour, 🥇 Gold badge — for the top students! People like Ama</p>
                 <div class="c-price">1,500 🪙</div>
-                <button class="c-buy" id="tierBtn-gold" onclick="buyTier('gold')">Get 5G Gold</button>
+                <button class="c-buy" id="tierBtn-gold" onclick="buyTier('gold')">Get CM Gold</button>
               </div>
               <div class="c-card" id="tierCard-premium">
                 <div style="font-size:2.3rem;margin-bottom:9px">⭐</div>
-                <h3>5G Premium</h3>
-                <p>Golden shimmering name, ⭐ Premium badge, priority AI — the ultimate tier!For the AI Creator Himself Petnan🌞</p>
+                <h3>CM Premium</h3>
+                <p>Golden shimmering name, ⭐ Premium badge, priority AI — the ultimate tier! For the AI Creator Himself Petnan🌞</p>
                 <div class="c-price">2,000 🪙</div>
-                <button class="c-buy" id="tierBtn-premium" onclick="buyTier('premium')">Get Premium</button>
+                <button class="c-buy" id="tierBtn-premium" onclick="buyTier('premium')">Get CM Premium</button>
               </div>
             </div>
           </div>
@@ -1574,7 +1574,7 @@ function toggleMembers(){
 // ═══════════════════════════════════════
 function buildMsg(msg, channel){
   const isOwn = msg.sender === ME;
-  const isAI  = msg.sender === '5 GREEN AI';
+  const isAI  = msg.sender === 'Classmates AI';
   const isSys = msg.type === 'system';
 
   const row = document.createElement('div');
@@ -2163,7 +2163,7 @@ socket.on('aiMessage', msg=>{
 socket.on('aiTyping', active=>{
   aiLocked=active;
   const tb=document.getElementById('aiTypingBar');
-  tb.innerHTML=active?`5 GREEN AI is thinking<span class="tdots"><span></span><span></span><span></span></span>`:'';
+  tb.innerHTML=active?`Classmates AI is thinking<span class="tdots"><span></span><span></span><span></span></span>`:'';
   const btn=document.getElementById('aiSendBtn');
   if(btn) btn.disabled=active;
 });
@@ -2368,7 +2368,7 @@ function updateCoinUI(coins, premium, tier){
 
   // topbar tier badge
   const pmBadge=document.getElementById('pmBadge');
-  const TIER_LABELS={pro:'🔵 5G Pro',silver:'🩶 5G Silver',gold:'🥇 5G Gold',premium:'⭐ Premium'};
+  const TIER_LABELS={pro:'🔵 CM Pro',silver:'🩶 CM Silver',gold:'🥇 CM Gold',premium:'⭐ CM Premium'};
   if(pmBadge){
     if(tier){ pmBadge.textContent=TIER_LABELS[tier]||'⭐ Premium'; pmBadge.style.display=''; }
     else { pmBadge.style.display='none'; }
@@ -2392,7 +2392,7 @@ function updateCoinUI(coins, premium, tier){
     if(!btn) return;
     if(i<=currentIdx){ btn.textContent='✅ Owned'; btn.disabled=true; }
     else if(coins<costs[t]){ btn.textContent=`Need ${(costs[t]-coins).toLocaleString()} more 🪙`; btn.disabled=true; }
-    else { btn.textContent={pro:'Get 5G Pro',silver:'Get 5G Silver',gold:'Get 5G Gold',premium:'Get Premium'}[t]; btn.disabled=false; }
+    else { btn.textContent={pro:'Get CM Pro',silver:'Get CM Silver',gold:'Get CM Gold',premium:'Get CM Premium'}[t]; btn.disabled=false; }
   });
 
   // settings
@@ -2428,7 +2428,7 @@ socket.on('premiumUnlocked',({profile})=>{
   myProfile=Object.assign(myProfile,profile);
   profileCache[ME]=myProfile;
   updateCoinUI(profile.coins,true,'premium');
-  showToast('⭐ 5G Premium unlocked!','coin-toast');
+  showToast('⭐ CM Premium unlocked!','coin-toast');
   buildDMList(); buildMembersList();
 });
 socket.on('premiumError', msg=>{ showToast('⚠️ '+msg); });
