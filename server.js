@@ -139,6 +139,7 @@ const STUDENTS = [
   { name: 'Adedamola Egbonwon',         password: 'Adedamola123'    },
   { name: 'Fievaoghene Atebe',          password: 'Fieva123'        },
   { name: 'Ethan Adeleke',              password: 'Ethan123'        },
+  { name: 'Test Person',                password: 'Test123'          },
 ];
 
 // ── In-memory profile + coins store ───────────────────────────────────────────
