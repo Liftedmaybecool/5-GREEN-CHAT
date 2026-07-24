@@ -702,7 +702,7 @@ input,textarea,select{font-family:inherit}
 .cb-accept{flex:1;background:var(--green);border:none;border-radius:8px;color:#000;padding:8px;font-size:.81rem;font-weight:700}
 .cb-decline{flex:1;background:var(--red);border:none;border-radius:8px;color:#fff;padding:8px;font-size:.81rem;font-weight:700}
 /* TOAST */
-.toast{position:fixed;bottom:17px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid rgba(77,166,255,.3);border-radius:11px;padding:9px 17px;font-size:.82rem;color:var(--text);z-index:999;animation:fadeUp .3s ease;pointer-events:none;white-space:nowrap}
+.toast{position:fixed;bottom:17px;left:50%;transform:translateX(-50%);background:var(--bg3);border:1px solid rgba(77,166,255,.3);border-radius:11px;padding:9px 17px;font-size:.82rem;color:var(--text);z-index:999;animation:fadeUp .3s ease;pointer-events:none;white-space:nowrap;max-width:90vw;white-space:normal;text-align:center}
 .toast.coin-toast{border-color:rgba(251,191,36,.4);color:var(--coin)}
 </style>
 </head>
@@ -2967,7 +2967,7 @@ document.addEventListener('keydown', e=>{
 // DISCONNECT / RECONNECT HANDLING
 // ═══════════════════════════════════════
 socket.on('disconnect',()=>{
-  showToast('⚠️ Looks like Petnan Did not design this Platform well😆 Reconecting...');
+  showToast('⚠️ Error 404: Homework Not Found — Your internet signal just dropped out faster than your motivation on a Monday morning. Reconnecting before the teacher notices…');
 });
 socket.on('connect',()=>{
   if(ME){
