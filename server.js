@@ -133,7 +133,7 @@ const STUDENTS = [
   { name: 'Eliora Ighodalo',            password: 'Eliora123'       },
   { name: 'Oluwanifesimi Thomas',       password: 'Nifesimi123'     },
   { name: 'Ereremena Orife',            password: 'Ereremena123'    },
-  { name: 'Petnan Fwangkwal',           password: 'Petnan123'       },
+  { name: '✨ Petnan Fwangkwal',         password: 'Petnan123'       },
   { name: 'Fareedah Ibrahim',           password: 'Fareedah123'     },
   { name: 'Tamunomiebi Miebaga',        password: 'Tamuno123'       },
   { name: 'Adedamola Egbonwon',         password: 'Adedamola123'    },
@@ -150,13 +150,13 @@ function getProfile(name) {
   if (!profileStore[name]) {
     profileStore[name] = {
       avatar: null, bio: '', status: 'online',
-      coins: name === 'Petnan Fwangkwal' ? 100000 : name === 'Test Person' ? 1000 : 0,
+      coins: name === '✨ Petnan Fwangkwal' ? 100000 : name === 'Test Person' ? 1000 : 0,
       premium: false, tier: null, premiumSince: null,
       studyMinutes: 0,
     };
   }
   // ensure Petnan always starts with 100k if not set yet
-  if (name === 'Petnan Fwangkwal' && profileStore[name].coins === 0) {
+  if (name === '✨ Petnan Fwangkwal' && profileStore[name].coins === 0) {
     profileStore[name].coins = 100000;
   }
   return profileStore[name];
@@ -174,7 +174,7 @@ const TIERS = {
   pro:     { cost: 500,  label: 'CM Pro',    color: '#60a5fa', emoji: '🔵' },
   silver:  { cost: 1000, label: 'CM Silver', color: '#94a3b8', emoji: '🩶' },
   gold:    { cost: 1500, label: 'CM Gold',   color: '#f59e0b', emoji: '🥇' },
-  premium: { cost: 2000, label: 'CM Premium',color: '#fbbf24', emoji: '⭐' },
+  premium: { cost: 2000, label: 'CM Premium',color: '#f7b100ff', emoji: '⭐' },
 };
 
 function startStudySession(name, socket) {
@@ -230,7 +230,7 @@ async function sendForgotPasswordEmail(fromName, message) {
   if (mailer) {
     await mailer.sendMail({
       from:    process.env.EMAIL_USER,
-      to:      'petnan2016@gmail.com',
+      to:      'liftedyaktu@gmail.com',
       subject: `[Classmates Chat] Password Help — ${fromName}`,
       text:    body,
     });
@@ -259,7 +259,7 @@ Your personality:
 • Honest: if something is beyond your training data, you say so
 • Age-appropriate: you speak at the right level for school students
 
-Your creator is Petnan Fwangkwal, the AI Creator of Classmates Chat.
+Your creator is ✨ Petnan Fwangkwal, the AI Creator of Classmates Chat.
 
 You can:
 ✅ Solve maths problems step-by-step
