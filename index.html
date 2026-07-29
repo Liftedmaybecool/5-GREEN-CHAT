@@ -318,6 +318,14 @@ input,textarea,select{font-family:inherit}
 .p-item .pi{font-size:.88rem;flex-shrink:0}
 .p-item .pn{font-size:.8rem;color:var(--text2);flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;transition:color .18s}
 .p-item.active .pn{color:var(--neon-cyan);font-weight:600;text-shadow:0 0 6px var(--neon-cyan)}
+.search-wrap{padding:0 12px 10px}
+.search-wrap input{width:100%;background:rgba(0,245,255,.06);border:1px solid rgba(0,245,255,.12);border-radius:10px;color:var(--text);padding:9px 11px;font-size:.82rem;outline:none;transition:all .2s}
+.search-wrap input:focus{border-color:var(--neon-cyan);box-shadow:0 0 8px rgba(0,245,255,.12)}
+.ai-fav-item{background:rgba(0,245,255,.05);border:1px solid rgba(0,245,255,.12);border-radius:12px;padding:12px;gap:10px;display:flex;flex-direction:column;margin-bottom:10px}
+.ai-fav-meta{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:.73rem;color:var(--text3);margin-bottom:8px}
+.fav-remove{background:transparent;border:none;color:var(--neon-pink);font-size:.85rem;font-weight:700;cursor:pointer}
+.fav-remove:hover{color:#ff6a95}
+.ai-fav-text{font-size:.82rem;color:var(--text2);line-height:1.5;white-space:pre-wrap}
 .pbadge{
   background:var(--neon-pink);color:#fff;font-size:.54rem;font-weight:700;min-width:15px;
   height:15px;border-radius:8px;display:none;align-items:center;justify-content:center;padding:0 3px;
@@ -787,12 +795,16 @@ input,textarea,select{font-family:inherit}
         </div>
         <div id="pnl-dm" style="display:none">
           <div class="panel-hdr"><h3>✉️ Messages</h3><p>Private chats</p></div>
-          <div class="panel-body"><div class="p-sec">CLASSMATES</div><div id="dmList"></div></div>
+          <div class="panel-body"><div class="p-sec">CLASSMATES</div>
+            <div class="search-wrap"><input id="dmSearch" placeholder="Search students…" oninput="updateDMFilter(this.value)"/></div>
+            <div id="dmList"></div>
+          </div>
         </div>
         <div id="pnl-groups" style="display:none">
           <div class="panel-hdr"><h3>👥 Groups</h3><p>Group chats</p></div>
           <div class="panel-body">
             <div class="p-sec">YOUR GROUPS<button class="p-add" onclick="openCreateGroup()" title="New group">＋</button></div>
+            <div class="search-wrap"><input id="groupSearch" placeholder="Search groups…" oninput="updateGroupFilter(this.value)"/></div>
             <div id="groupList"></div>
           </div>
         </div>
@@ -937,6 +949,8 @@ input,textarea,select{font-family:inherit}
               <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#4c1d95,#7c3aed,#a78bfa);border:2px solid rgba(167,139,250,.5);display:flex;align-items:center;justify-content:center;font-size:1.15rem;box-shadow:0 0 12px rgba(167,139,250,.4);flex-shrink:0">🤖</div>
               <div><h2>Classmates AI</h2><p>All-knowing · Super-smart · Always helpful</p></div>
             </div>
+            <button class="hdr-btn" onclick="continueAI()">➡ Continue</button>
+            <button class="hdr-btn" onclick="openAIFavorites()">⭐ Favorites</button>
             <button class="hdr-btn" onclick="clearAIChat()">🗑 Clear</button>
           </div>
           <div class="messages" id="aiMsgs">
@@ -1053,42 +1067,18 @@ input,textarea,select{font-family:inherit}
                   <span class="transfer-bal-val" id="transferBal">0 🪙</span>
                 </div>
                 <div class="transfer-fields">
-                  <div class="transfer-field">
+                  <div class="transfer-field" style="flex:1;min-width:240px">
                     <label>Send To</label>
-                    <select id="transferTo">
-                      <option value="">— Choose classmate —</option>
-                      <option>Toni Macauly</option>
-                      <option>Oghenetejiri Ogheneochukwu</option>
-                      <option>Joanna Bogoro</option>
-                      <option>Ama-Abasi Benson</option>
-                      <option>Oluyemi Sosan</option>
-                      <option>Aisha Adeniyi</option>
-                      <option>Elissa Ojei</option>
-                      <option>Kwame Sagoe</option>
-                      <option>Oluwafeyikunmi Osunsedo</option>
-                      <option>Olayomade King</option>
-                      <option>Anthonia Celey Okogun</option>
-                      <option>Netochi Anichebe</option>
-                      <option>Ishaq Babalola</option>
-                      <option>Eliora Ighodalo</option>
-                      <option>Oluwanifesimi Thomas</option>
-                      <option>Ereremena Orife</option>
-                      <option>✨ Petnan Fwangkwal</option>
-                      <option>Fareedah Ibrahim</option>
-                      <option>Tamunomiebi Miebaga</option>
-                      <option>Adedamola Egbonwon</option>
-                      <option>Fievaoghene Atebe</option>
-                      <option>Ethan Adeleke</option>
-                      <option>Test Person</option>
-                    </select>
-                  </div>
-                  <div class="transfer-field">
+                    <div class="cb-list" id="transferRecipients" style="max-height:200px;overflow-y:auto;"></div>
+                    <div style="font-size:.72rem;color:var(--text3);margin-top:8px">Select one or more classmates to send the same amount to each.</div>
+                </div>
+                <div class="transfer-field">
                     <label>Amount</label>
                     <div class="transfer-amount-wrap">
                       <span class="transfer-coin-icon">🪙</span>
                       <input type="number" id="transferAmount" placeholder="0" min="1" max="1000000"/>
                     </div>
-                  </div>
+                </div>
                 </div>
                 <!-- Quick amount buttons -->
                 <div class="transfer-quick">
@@ -1301,6 +1291,17 @@ input,textarea,select{font-family:inherit}
   </div>
 </div>
 
+<!-- AI Favorites Modal -->
+<div class="modal-overlay" id="aiFavoritesModal">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-title">⭐ Saved AI Answers</div>
+    <div class="ai-fav-list" id="aiFavoritesList" style="max-height:420px;overflow-y:auto;margin-top:12px"></div>
+    <div class="modal-actions" style="margin-top:16px">
+      <button class="btn-ghost" onclick="closeModal('aiFavoritesModal')">Close</button>
+    </div>
+  </div>
+</div>
+
 <!-- Online Members Modal -->
 <div class="modal-overlay" id="onlineModal">
   <div class="modal-box" style="max-width:360px">
@@ -1378,6 +1379,12 @@ let isMuted = false, isCamOff = false;
 // Pending file attachments per channel: { gen:[], dm:[], grp:[], ai:[] }
 const pendingFiles = { gen:[], dm:[], grp:[], ai:[] };
 
+let dmFilter = '';
+let groupFilter = '';
+let aiFavorites = [];
+let aiMessageTexts = {};
+let lastAIMessageId = null;
+
 // ═══════════════════════════════════════
 // HELPERS
 // ═══════════════════════════════════════
@@ -1389,6 +1396,66 @@ function autoGrow(el){ el.style.height='auto'; el.style.height=Math.min(el.scrol
 function scrollBottom(id){ const el=document.getElementById(id); if(el) el.scrollTop=el.scrollHeight }
 function openModal(id){ document.getElementById(id).classList.add('open') }
 function closeModal(id){ document.getElementById(id).classList.remove('open') }
+
+function loadAIFavorites(){
+  try{ aiFavorites = JSON.parse(localStorage.getItem('aiFavorites')||'[]') || []; }catch(e){ aiFavorites = []; }
+  renderAIFavorites();
+}
+function saveAIFavorites(){
+  localStorage.setItem('aiFavorites', JSON.stringify(aiFavorites));
+}
+function isAIFavorited(id){ return aiFavorites.some(f=>f.id===id); }
+function toggleAIFavorite(id){
+  if(!id) return;
+  const idx = aiFavorites.findIndex(f=>f.id===id);
+  if(idx > -1){ aiFavorites.splice(idx,1); showToast('Removed AI answer from favorites.'); }
+  else {
+    const text = aiMessageTexts[id] || '';
+    aiFavorites.unshift({ id, text, savedAt: new Date().toISOString() });
+    if(aiFavorites.length > 30) aiFavorites.length = 30;
+    showToast('Saved AI answer to favorites! ⭐');
+  }
+  saveAIFavorites();
+  renderAIFavorites();
+  refreshAIMessagesFavorites();
+}
+function renderAIFavorites(){
+  const list = document.getElementById('aiFavoritesList');
+  if(!list) return;
+  list.innerHTML = '';
+  if(!aiFavorites.length){
+    list.innerHTML = '<div class="ai-fav-empty">No saved answers yet. Star a reply to keep it here.</div>';
+    return;
+  }
+  aiFavorites.forEach(fav => {
+    const item = document.createElement('div');
+    item.className = 'ai-fav-item';
+    item.innerHTML = `
+      <div class="ai-fav-meta">
+        <span>Saved ${esc(new Date(fav.savedAt).toLocaleString())}</span>
+        <button class="fav-remove" onclick="toggleAIFavorite('${attr(fav.id)}')">✕</button>
+      </div>
+      <div class="ai-fav-text">${fmtText(fav.text)}</div>`;
+    list.appendChild(item);
+  });
+}
+function openAIFavorites(){ openModal('aiFavoritesModal'); renderAIFavorites(); }
+function refreshAIMessagesFavorites(){
+  document.querySelectorAll('[data-ai-fav-id]').forEach(btn=>{
+    const fav = isAIFavorited(btn.dataset.aiFavId);
+    btn.textContent = fav ? '⭐ Saved' : '⭐ Save';
+    btn.classList.toggle('saved', fav);
+  });
+}
+function continueAI(){
+  const inp = document.getElementById('aiInput');
+  if(!inp || aiLocked) return;
+  if(inp.value.trim()){ sendAI(); return; }
+  if(!lastAIMessageId){ showToast('Type a question or ask the AI to continue.'); return; }
+  inp.value = 'Please continue from your last answer.';
+  autoGrow(inp);
+  sendAI();
+}
 
 function showToast(msg, type=''){
   const t=document.createElement('div');
@@ -1748,10 +1815,15 @@ function buildMsg(msg, channel){
     ? `<div class="reply-snip"><strong>${esc(msg.replyTo.sender)}</strong>: ${esc((msg.replyTo.text||'').substring(0,80))}</div>`
     : '';
 
+  const favHTML = isAI ? `
+    <div class="msg-acts">
+      <button class="act-btn ai-fav-btn" data-ai-fav-id="${attr(msg.id)}" onclick="toggleAIFavorite('${attr(msg.id)}')">⭐ Save</button>
+    </div>` : '';
+
   const actHTML = !isAI ? `
     <div class="msg-acts">
       <button class="act-btn" onclick="setReply('${channel}','${attr(msg.sender)}','${attr((msg.text||'').substring(0,60))}')">↩ Reply</button>
-    </div>` : '';
+    </div>` : favHTML;
 
   // Only show bubble if there is actual text content
   const bubbleHTML = (msg.text||'').trim()
@@ -1853,6 +1925,8 @@ socket.on('loginSuccess', data=>{
   updateCoinUI(myProfile.coins||0, myProfile.premium||false);
   buildDMList();
   buildGroupList();
+  buildTransferRecipients();
+  loadAIFavorites();
   showSection('general');
 });
 
@@ -2028,7 +2102,13 @@ function buildDMList(){
   const list=document.getElementById('dmList');
   if(!list) return;
   list.innerHTML='';
-  allStudents.filter(s=>s.name!==ME).forEach(s=>{
+  const filter = dmFilter.trim().toLowerCase();
+  const matches = allStudents.filter(s=>s.name!==ME && (!filter || s.name.toLowerCase().includes(filter)));
+  if(!matches.length){
+    list.innerHTML='<div style="padding:10px 14px;color:var(--text3);font-size:.78rem">No classmates match your search.</div>';
+    return;
+  }
+  matches.forEach(s=>{
     const isOn=onlineUsers.includes(s.name);
     const item=document.createElement('div');
     item.className='p-item'+(currentDM===s.name?' active':'');
@@ -2041,6 +2121,8 @@ function buildDMList(){
     list.appendChild(item);
   });
 }
+
+function updateDMFilter(value){ dmFilter = String(value||''); buildDMList(); }
 
 function openDM(name){
   currentDM=name;
@@ -2130,11 +2212,14 @@ function buildGroupList(){
   const list=document.getElementById('groupList');
   if(!list) return;
   list.innerHTML='';
-  if(!myGroups.length){
-    list.innerHTML='<div style="padding:8px 12px;font-size:.75rem;color:var(--text3)">No groups yet. Create one!</div>';
+  const filter = groupFilter.trim().toLowerCase();
+  const groups = myGroups.filter(g => !filter || g.name.toLowerCase().includes(filter));
+  if(!groups.length){
+    const emptyText = groupFilter ? 'No groups match your search.' : 'No groups yet. Create one!';
+    list.innerHTML=`<div style="padding:8px 12px;font-size:.75rem;color:var(--text3)">${emptyText}</div>`;
     return;
   }
-  myGroups.forEach(g=>{
+  groups.forEach(g=>{
     const item=document.createElement('div');
     item.className='p-item'+(currentGroup===g.id?' active':'');
     item.id='grpi-'+g.id;
@@ -2144,6 +2229,8 @@ function buildGroupList(){
     list.appendChild(item);
   });
 }
+
+function updateGroupFilter(value){ groupFilter = String(value||''); buildGroupList(); }
 
 function openGroup(groupId){
   const g=myGroups.find(x=>x.id===groupId);
@@ -2302,7 +2389,10 @@ socket.on('aiMessage', msg=>{
   // hide welcome screen on first message
   const welcome=document.getElementById('aiWelcome');
   if(welcome) welcome.remove();
+  aiMessageTexts[msg.id] = msg.text || '';
+  lastAIMessageId = msg.id;
   appendMsg('aiMsgs', msg, 'ai');
+  refreshAIMessagesFavorites();
   // also pipe to Study AI tab if it's open
   if(document.getElementById('hw-tab-study').style.display!=='none'){
     const sw=document.getElementById('studyWelcome');
@@ -2607,24 +2697,65 @@ function buyPremium(){ buyTier('premium'); }
 // ── COIN TRANSFER ──────────────────────────────────────────────────────────────
 const txLog = [];
 
-function setTransferAmt(n){ const inp=document.getElementById('transferAmount'); if(inp) inp.value=n; }
-function setTransferMax(){ const inp=document.getElementById('transferAmount'); if(inp) inp.value=myProfile.coins||0; }
+function buildTransferRecipients(){
+  const container = document.getElementById('transferRecipients');
+  if(!container) return;
+  container.innerHTML = '';
+  const recipients = (allStudents||[])
+    .filter(s => s.name !== ME)
+    .sort((a,b) => a.name.localeCompare(b.name));
+  if(!recipients.length){
+    container.innerHTML = '<div style="color:var(--text3);font-size:.85rem">No other classmates available yet.</div>';
+    return;
+  }
+  recipients.forEach(student => {
+    const safeId = `transfer-recipient-${student.name.replace(/[^a-zA-Z0-9_-]/g,'')}`;
+    const row = document.createElement('div');
+    row.className = 'cb-row';
+    row.innerHTML = `<label class="cb-item"><input type="checkbox" id="${safeId}" value="${student.name}" onchange="updateTransferMaxForRecipients()" /> <span>${student.name}</span></label>`;
+    container.appendChild(row);
+  });
+}
 
 function doTransfer(){
-  const to  = document.getElementById('transferTo')?.value;
+  const recipients = getSelectedRecipients();
   const amt = document.getElementById('transferAmount')?.value;
   const btn = document.getElementById('transferSendBtn');
-  if(!to){ showTransferResult('❌ Please choose a classmate to send to.','error'); return; }
+  if(!recipients.length){ showTransferResult('❌ Please choose at least one classmate.','error'); return; }
   if(!amt||Number(amt)<=0){ showTransferResult('❌ Please enter an amount.','error'); return; }
-  if(to===ME){ showTransferResult('❌ You cannot send coins to yourself.','error'); return; }
-  if(Number(amt) > (myProfile.coins||0)){
-    const short = Number(amt)-(myProfile.coins||0);
-    showTransferResult(`❌ Insufficient funds! You need ${short.toLocaleString()} more 🪙.`,'error');
+  if(recipients.includes(ME)){ showTransferResult('❌ You cannot send coins to yourself.','error'); return; }
+  const perAmount = Math.floor(Number(amt));
+  const totalCost = perAmount * recipients.length;
+  if(totalCost > (myProfile.coins||0)){
+    const short = totalCost - (myProfile.coins||0);
+    showTransferResult(`❌ Insufficient funds! You need ${short.toLocaleString()} more 🪙 to send ${perAmount.toLocaleString()} to ${recipients.length} classmate${recipients.length===1?'':'s'}.`,'error');
     return;
   }
   if(btn) btn.disabled=true;
-  socket.emit('transferCoins',{ to, amount: Number(amt) });
+  socket.emit('transferCoins',{ to: recipients, amount: perAmount });
 }
+
+function getSelectedRecipients(){
+  const container = document.getElementById('transferRecipients');
+  if(!container) return [];
+  return Array.from(container.querySelectorAll('input[type=checkbox]:checked')).map(i => i.value);
+}
+
+function updateTransferMaxForRecipients(){
+  const selected = getSelectedRecipients();
+  const inp = document.getElementById('transferAmount');
+  if(!inp) return;
+  if(!selected.length){
+    inp.max = myProfile.coins||0;
+    return;
+  }
+  const maxPer = Math.floor((myProfile.coins||0) / selected.length);
+  inp.max = maxPer;
+  if(Number(inp.value) > maxPer) inp.value = maxPer;
+}
+
+function setTransferAmt(n){ const inp=document.getElementById('transferAmount'); if(inp){ inp.value=n; updateTransferMaxForRecipients(); } }
+function setTransferMax(){ const inp=document.getElementById('transferAmount'); if(!inp) return; const selected=getSelectedRecipients(); if(selected.length){ inp.value=Math.floor((myProfile.coins||0)/selected.length); } else { inp.value=myProfile.coins||0; } }
 
 function showTransferResult(msg, type){
   const el=document.getElementById('transferResult');
@@ -2662,13 +2793,16 @@ socket.on('transferResult',({ok,message,error,newBalance,to,amount})=>{
     showTransferResult(message,'success');
     myProfile.coins=newBalance;
     updateCoinUI(newBalance, myProfile.premium||false, myProfile.tier||null);
-    const now=new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
-    addTxItem('💸',`Sent to ${to}`,now,`-${Number(amount).toLocaleString()} 🪙`,'sent');
+    const recipientText = Array.isArray(to) ? to.join(', ') : to;
+    const recipientCount = Array.isArray(to) ? to.length : 1;
+    const totalSent = Number(amount) * recipientCount;
+    const now = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+    addTxItem('💸',`Sent ${Number(amount).toLocaleString()} 🪙 each to ${recipientText}`, now, `-${totalSent.toLocaleString()} 🪙`, 'sent');
     const amtInp=document.getElementById('transferAmount');
-    const toSel=document.getElementById('transferTo');
+    const checkboxes=document.querySelectorAll('#transferRecipients input[type=checkbox]');
     if(amtInp) amtInp.value='';
-    if(toSel) toSel.value='';
-    showToast(`💸 Sent ${Number(amount).toLocaleString()} 🪙 to ${to}!`,'coin-toast');
+    if(checkboxes) checkboxes.forEach(cb=>cb.checked=false);
+    showToast(`💸 Sent ${Number(amount).toLocaleString()} 🪙 each to ${recipientText}! Total ${totalSent.toLocaleString()} 🪙.`, 'coin-toast');
   } else {
     showTransferResult(error||'Transfer failed.','error');
   }

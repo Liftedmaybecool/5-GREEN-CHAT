@@ -11,6 +11,55 @@ const { Server } = require('socket.io');
 const multer     = require('multer');
 const { v4: uuidv4 } = require('uuid');
 
+const dataDir = path.join(__dirname, 'data');
+if (!fs.existsSync(dataDir)) fs.mkdirSync(dataDir);
+const DB_FILE = path.join(dataDir, 'data.json');
+
+let dbState = {
+  students: [],
+  messages: [],
+  ai_history: [],
+  groups: [],
+  group_members: [],
+  homework: [],
+  homework_comments: [],
+  homework_submissions: [],
+};
+
+function saveDB(){
+  try { fs.writeFileSync(DB_FILE, JSON.stringify(dbState, null, 2)); }
+  catch (err) { console.error('Failed to save data.json', err); }
+}
+
+function loadDB(){
+  if (fs.existsSync(DB_FILE)) {
+    try {
+      dbState = JSON.parse(fs.readFileSync(DB_FILE, 'utf8'));
+    } catch (err) {
+      console.error('Failed to load data.json, recreating file.', err);
+      dbState = {
+        students: [], messages: [], ai_history: [], groups: [], group_members: [],
+        homework: [], homework_comments: [], homework_submissions: [],
+      };
+      saveDB();
+    }
+  } else {
+    saveDB();
+  }
+  dbState.students = dbState.students || [];
+  dbState.messages = dbState.messages || [];
+  dbState.ai_history = dbState.ai_history || [];
+  dbState.groups = dbState.groups || [];
+  dbState.group_members = dbState.group_members || [];
+  dbState.homework = dbState.homework || [];
+  dbState.homework_comments = dbState.homework_comments || [];
+  dbState.homework_submissions = dbState.homework_submissions || [];
+}
+
+loadDB();
+const groupRooms = {};
+loadGroupsFromDB();
+
 const app    = express();
 const server = http.createServer(app);
 const io     = new Server(server, { maxHttpBufferSize: 1e8 });
@@ -117,49 +166,210 @@ async function groqMiniCreate(params) {
 
 // ── Student roster ─────────────────────────────────────────────────────────────
 const STUDENTS = [
-  { name: 'Toni Macauly',               password: 'Toni123'         },
-  { name: 'Oghenetejiri Ogheneochukwu', password: 'Oghenetejiri123' },
-  { name: 'Joanna Bogoro',              password: 'Joanna123'       },
-  { name: 'Ama-Abasi Benson',           password: 'Ama123'          },
-  { name: 'Oluyemi Sosan',              password: 'Oluyemi123'      },
-  { name: 'Aisha Adeniyi',              password: 'Aisha123'        },
-  { name: 'Elissa Ojei',                password: 'Elissa123'       },
-  { name: 'Kwame Sagoe',                password: 'Kwame123'        },
-  { name: 'Oluwafeyikunmi Osunsedo',    password: 'Feyi123'         },
-  { name: 'Olayomade King',             password: 'Yomade123'       },
-  { name: 'Anthonia Celey Okogun',      password: 'Anthonia123'     },
-  { name: 'Netochi Anichebe',           password: 'Netochi123'      },
-  { name: 'Ishaq Babalola',             password: 'Ishaq123'        },
-  { name: 'Eliora Ighodalo',            password: 'Eliora123'       },
-  { name: 'Oluwanifesimi Thomas',       password: 'Nifesimi123'     },
-  { name: 'Ereremena Orife',            password: 'Ereremena123'    },
-  { name: '✨ Petnan Fwangkwal',         password: 'Petnan123'       },
-  { name: 'Fareedah Ibrahim',           password: 'Fareedah123'     },
-  { name: 'Tamunomiebi Miebaga',        password: 'Tamuno123'       },
-  { name: 'Adedamola Egbonwon',         password: 'Adedamola123'    },
-  { name: 'Fievaoghene Atebe',          password: 'Fieva123'        },
-  { name: 'Ethan Adeleke',              password: 'Ethan123'        },
-  { name: 'Test Person',                password: 'Test123'          },
+  { name: 'Toni Macauly',               password: 'Toni_5'         },
+  { name: 'Oghenetejiri Ogheneochukwu', password: 'Oghenetejiri_5' },
+  { name: 'Joanna Bogoro',              password: 'Joanna_5'       },
+  { name: 'Ama-Abasi Benson',           password: 'Ama_5'          },
+  { name: 'Oluyemi Sosan',              password: 'Oluyemi_5'      },
+  { name: 'Aisha Adeniyi',              password: 'Aisha_5'        },
+  { name: 'Elissa Ojei',                password: 'Elissa_5'       },
+  { name: 'Kwame Sagoe',                password: 'Kwame_5'        },
+  { name: 'Oluwafeyikunmi Osunsedo',    password: 'Feyi_5'         },
+  { name: 'Olayomade King',             password: 'Yomade_5'       },
+  { name: 'Anthonia Celey Okogun',      password: 'Anthonia_5'     },
+  { name: 'Netochi Anichebe',           password: 'Netochi_5'      },
+  { name: 'Ishaq Babalola',             password: 'Ishaq_5'        },
+  { name: 'Eliora Ighodalo',            password: 'Eliora_5'       },
+  { name: 'Oluwanifesimi Thomas',       password: 'Nifesimi_5'     },
+  { name: 'Ereremena Orife',            password: 'Ereremena_5'    },
+  { name: '✨ Petnan Fwangkwal',         password: 'Petnan_5'       },
+  { name: 'Fareedah Ibrahim',           password: 'Fareedah_5'     },
+  { name: 'Tamunomiebi Miebaga',        password: 'Tamuno_5'       },
+  { name: 'Adedamola Egbonwon',         password: 'Adedamola_5'    },
+  { name: 'Fievaoghene Atebe',          password: 'Fieva_5'        },
+  { name: 'Ethan Adeleke',              password: 'Ethan_5'        },
+  { name: 'Test Person',                password: 'Test_5'          },
 ];
 
-// ── In-memory profile + coins store ───────────────────────────────────────────
-// profileStore[name] = { avatar, bio, status, coins, premium, premiumSince, studyMinutes }
-const profileStore = {};
+if (!dbState.students.length) autoSeedStudents(); else migrateStudentData();
+
+function autoSeedStudents(){
+  for (const s of STUDENTS){
+    let existing = dbState.students.find(st => st.name === s.name);
+    if (existing) continue;
+    const initialCoins = s.name === '✨ Petnan Fwangkwal' ? 100000 : s.name === 'Test Person' ? 1000 : 0;
+    dbState.students.push({
+      name: s.name,
+      password: s.password,
+      avatar: null,
+      bio: '',
+      status: 'online',
+      coins: initialCoins,
+      class_coins: initialCoins,
+      premium: 0,
+      tier: null,
+      premiumSince: null,
+      studyMinutes: 0,
+    });
+  }
+  saveDB();
+}
+
+function migrateStudentData(){
+  let updated = false;
+  dbState.students.forEach(s => {
+    if (typeof s.password === 'string' && s.password.endsWith('123')) {
+      s.password = s.password.slice(0, -3) + '_5';
+      updated = true;
+    }
+    if (s.coins === undefined) { s.coins = 0; updated = true; }
+    if (s.class_coins === undefined) { s.class_coins = s.coins; updated = true; }
+    if (s.premium === undefined) { s.premium = 0; updated = true; }
+    if (s.tier === undefined) { s.tier = null; updated = true; }
+    if (s.premiumSince === undefined) { s.premiumSince = null; updated = true; }
+    if (s.studyMinutes === undefined) { s.studyMinutes = 0; updated = true; }
+    if (s.status === undefined) { s.status = 'online'; updated = true; }
+  });
+  if (updated) saveDB();
+}
 
 function getProfile(name) {
-  if (!profileStore[name]) {
-    profileStore[name] = {
-      avatar: null, bio: '', status: 'online',
-      coins: name === '✨ Petnan Fwangkwal' ? 100000 : name === 'Test Person' ? 1000 : 0,
-      premium: false, tier: null, premiumSince: null,
-      studyMinutes: 0,
+  const row = dbState.students.find(s => s.name === name);
+  if (row) {
+    const balance = row.class_coins !== null && row.class_coins !== undefined ? row.class_coins : row.coins || 0;
+    return {
+      avatar: row.avatar,
+      bio: row.bio || '',
+      status: row.status || 'online',
+      coins: balance,
+      class_coins: balance,
+      premium: Boolean(row.premium),
+      tier: row.tier || null,
+      premiumSince: row.premiumSince || null,
+      studyMinutes: row.studyMinutes || 0,
     };
   }
-  // ensure Petnan always starts with 100k if not set yet
-  if (name === '✨ Petnan Fwangkwal' && profileStore[name].coins === 0) {
-    profileStore[name].coins = 100000;
-  }
-  return profileStore[name];
+  return {
+    avatar: null,
+    bio: '',
+    status: 'online',
+    coins: 0,
+    class_coins: 0,
+    premium: false,
+    tier: null,
+    premiumSince: null,
+    studyMinutes: 0,
+  };
+}
+
+function updateProfile(name, updates){
+  const row = dbState.students.find(s => s.name === name);
+  if (!row) return;
+  if (updates.avatar !== undefined) row.avatar = updates.avatar;
+  if (updates.bio !== undefined) row.bio = updates.bio;
+  if (updates.status !== undefined) row.status = updates.status;
+  if (updates.coins !== undefined) row.coins = updates.coins;
+  if (updates.class_coins !== undefined) row.class_coins = updates.class_coins;
+  if (updates.premium !== undefined) row.premium = updates.premium ? 1 : 0;
+  if (updates.tier !== undefined) row.tier = updates.tier;
+  if (updates.premiumSince !== undefined) row.premiumSince = updates.premiumSince;
+  if (updates.studyMinutes !== undefined) row.studyMinutes = updates.studyMinutes;
+  saveDB();
+}
+
+function changeCoins(name, delta){
+  const row = dbState.students.find(s => s.name === name);
+  if (!row) return null;
+  row.class_coins = (row.class_coins || 0) + delta;
+  row.coins = (row.coins || 0) + delta;
+  saveDB();
+  return row.class_coins;
+}
+
+function setCoins(name, amount){
+  const row = dbState.students.find(s => s.name === name);
+  if (!row) return;
+  row.class_coins = amount;
+  row.coins = amount;
+  saveDB();
+}
+
+function storeMessage(msg){
+  dbState.messages.push({
+    id: msg.id,
+    channel: msg.channel,
+    sender: msg.sender,
+    recipient: msg.recipient || null,
+    groupId: msg.groupId || null,
+    text: msg.text || null,
+    replyTo: msg.replyTo || null,
+    attachment: msg.attachment || null,
+    timestamp: msg.timestamp,
+  });
+  saveDB();
+}
+
+function getGeneralHistory(limit = 100){
+  const rows = dbState.messages.filter(m => m.channel === 'general');
+  return rows.slice(Math.max(rows.length - limit, 0)).map(r => ({ ...r }));
+}
+
+function getDMHistory(userA, userB, limit = 100){
+  const rows = dbState.messages.filter(m =>
+    m.channel === 'dm' && ((m.sender === userA && m.recipient === userB) || (m.sender === userB && m.recipient === userA))
+  );
+  return rows.slice(Math.max(rows.length - limit, 0)).map(r => ({ ...r }));
+}
+
+function getGroupHistory(groupId, limit = 100){
+  const rows = dbState.messages.filter(m => m.channel === 'group' && m.groupId === groupId);
+  return rows.slice(Math.max(rows.length - limit, 0)).map(r => ({ ...r }));
+}
+
+function saveAIHistory(student, role, content){
+  dbState.ai_history.push({ id: uuidv4(), student, role, content, timestamp: new Date().toISOString() });
+  saveDB();
+}
+
+function getAIHistory(student, limit = 10){
+  const rows = dbState.ai_history.filter(r => r.student === student);
+  return rows.slice(Math.max(rows.length - limit, 0)).map(r => ({ role: r.role, content: r.content }));
+}
+
+function loadGroupsFromDB(){
+  Object.keys(groupRooms).forEach(key => delete groupRooms[key]);
+  dbState.groups.forEach(g => {
+    groupRooms[g.id] = {
+      id: g.id,
+      name: g.name,
+      members: [],
+      createdBy: g.createdBy,
+      avatar: g.avatar,
+      createdAt: g.createdAt,
+      messages: [],
+    };
+  });
+  dbState.group_members.forEach(m => {
+    if (groupRooms[m.groupId]) {
+      groupRooms[m.groupId].members.push(m.member);
+    }
+  });
+}
+
+function getHomeworkList(){
+  const assignments = [...dbState.homework].sort((a, b) => b.timestamp.localeCompare(a.timestamp));
+  const comments = [...dbState.homework_comments].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+  const submissions = [...dbState.homework_submissions].sort((a, b) => a.timestamp.localeCompare(b.timestamp));
+  const map = new Map(assignments.map(hw => [hw.id, { ...hw, comments: [], submissions: [] }]));
+  comments.forEach(c => {
+    const hw = map.get(c.hwId);
+    if (hw) hw.comments.push(c);
+  });
+  submissions.forEach(s => {
+    const hw = map.get(s.hwId);
+    if (hw) hw.submissions.push(s);
+  });
+  return Array.from(map.values());
 }
 
 // ── Study session tracker ──────────────────────────────────────────────────────
@@ -207,13 +417,6 @@ function stopStudySession(name) {
 }
 
 // ── Message stores ─────────────────────────────────────────────────────────────
-const generalMessages = [];
-const dmMessages      = {};  // { "UserA||UserB": [ msg ] }
-const groupRooms      = {};  // { groupId: { name, members, messages, createdBy, avatar } }
-const homeworkStore   = [];
-const aiConversations = {}; // { name: [ {role, content} ] } — per-student private AI history
-
-function dmKey(a, b) { return [a, b].sort().join('||'); }
 
 // ── Nodemailer ─────────────────────────────────────────────────────────────────
 let mailer = null;
@@ -317,8 +520,8 @@ io.on('connection', (socket) => {
       premium: profile.premium,
     });
 
-    socket.emit('generalHistory',  generalMessages.slice(-100));
-    socket.emit('homeworkList',    homeworkStore);
+    socket.emit('generalHistory',  getGeneralHistory(100));
+    socket.emit('homeworkList',    getHomeworkList());
 
     broadcastOnlineUsers();
 
@@ -336,12 +539,11 @@ io.on('connection', (socket) => {
     if (!name || (!text && !attachment)) return;
     const msg = {
       id: uuidv4(), sender: name, text: (text || '').trim(),
-      replyTo: replyTo || null, timestamp: new Date().toISOString(),
+      channel: 'general', replyTo: replyTo || null, timestamp: new Date().toISOString(),
       type: 'student', premium: getProfile(name).premium,
       attachment: attachment || null,
     };
-    generalMessages.push(msg);
-    if (generalMessages.length > 500) generalMessages.shift();
+    storeMessage(msg);
     io.emit('generalMessage', msg);
   });
 
@@ -349,8 +551,6 @@ io.on('connection', (socket) => {
   socket.on('aiMessage', async ({ text, attachment }) => {
     const name = socket.data.name;
     if (!name || (!text && !attachment)) return;
-
-    if (!aiConversations[name]) aiConversations[name] = [];
 
     // Build display text for user message
     const displayText = text || (attachment ? `📎 ${attachment.name}` : '');
@@ -439,10 +639,23 @@ io.on('connection', (socket) => {
       }
     }
 
-    aiConversations[name].push({ role: 'user', content: userContent });
-    if (aiConversations[name].length > 40) aiConversations[name].splice(0, 2);
+    saveAIHistory(name, 'user', userContent);
+    storeMessage({
+      id: userMsg.id,
+      channel: 'ai',
+      sender: name,
+      recipient: 'Classmates AI',
+      text: displayText,
+      replyTo: null,
+      attachment: attachment || null,
+      timestamp: userMsg.timestamp,
+    });
 
     try {
+      // ── Load the latest AI memory from the database
+      const history = getAIHistory(name, 10);
+      const messagesWithContext = [...history, { role: 'user', content: userContent }];
+
       // ── Wikipedia real-time lookup ──────────────────────────────────────
       let wikiContext = '';
       try {
@@ -467,21 +680,18 @@ io.on('connection', (socket) => {
         }
       } catch (e) { /* silent */ }
 
-      const messagesWithContext = [...aiConversations[name]];
       if (wikiContext) {
-        messagesWithContext[messagesWithContext.length - 1] = {
-          role: 'user',
-          content: userContent + wikiContext,
-        };
+        messagesWithContext[messagesWithContext.length - 1].content += wikiContext;
       }
 
       const reply = await callAI(messagesWithContext, AI_SYSTEM_PROMPT);
-      aiConversations[name].push({ role: 'assistant', content: reply });
+      saveAIHistory(name, 'assistant', reply);
 
       const aiMsg = {
         id: uuidv4(), sender: 'Classmates AI', text: reply,
-        timestamp: new Date().toISOString(), type: 'ai',
+        channel: 'ai', recipient: name, timestamp: new Date().toISOString(), type: 'ai',
       };
+      storeMessage(aiMsg);
       socket.emit('aiTyping', false);
       socket.emit('aiMessage', aiMsg);
     } catch (err) {
@@ -499,23 +709,19 @@ io.on('connection', (socket) => {
   socket.on('getDM', ({ with: other }) => {
     const name = socket.data.name;
     if (!name) return;
-    const key = dmKey(name, other);
-    socket.emit('dmHistory', { with: other, messages: (dmMessages[key] || []).slice(-100) });
+    socket.emit('dmHistory', { with: other, messages: getDMHistory(name, other, 100) });
   });
 
   socket.on('dmMessage', ({ to, text, replyTo, attachment }) => {
     const from = socket.data.name;
     if (!from || !to || (!text && !attachment)) return;
-    const key = dmKey(from, to);
-    if (!dmMessages[key]) dmMessages[key] = [];
     const msg = {
-      id: uuidv4(), sender: from, to, text: (text || '').trim(),
-      replyTo: replyTo || null, timestamp: new Date().toISOString(),
+      id: uuidv4(), sender: from, recipient: to, text: (text || '').trim(),
+      channel: 'dm', replyTo: replyTo || null, timestamp: new Date().toISOString(),
       type: 'dm', premium: getProfile(from).premium,
       attachment: attachment || null,
     };
-    dmMessages[key].push(msg);
-    if (dmMessages[key].length > 500) dmMessages[key].shift();
+    storeMessage(msg);
     Object.entries(connectedUsers).forEach(([sid, u]) => {
       if (u.name === to) io.to(sid).emit('dmMessage', msg);
     });
@@ -526,9 +732,17 @@ io.on('connection', (socket) => {
   socket.on('createGroup', ({ name: groupName, members }) => {
     const creator = socket.data.name;
     if (!creator || !groupName) return;
-    const allMembers = [...new Set([creator, ...members])];
+    const allMembers = [...new Set([creator, ...(members || [])])];
     const id = uuidv4();
-    groupRooms[id] = { id, name: groupName, members: allMembers, messages: [], createdBy: creator, avatar: null };
+    const createdAt = new Date().toISOString();
+
+    dbState.groups.push({ id, name: groupName, createdBy: creator, avatar: null, createdAt });
+    allMembers.forEach(member => {
+      dbState.group_members.push({ id: uuidv4(), groupId: id, member });
+    });
+    saveDB();
+
+    groupRooms[id] = { id, name: groupName, members: allMembers, messages: [], createdBy: creator, avatar: null, createdAt };
 
     Object.entries(connectedUsers).forEach(([sid, u]) => {
       if (allMembers.includes(u.name)) {
@@ -544,7 +758,7 @@ io.on('connection', (socket) => {
     const name = socket.data.name;
     const g = groupRooms[groupId];
     if (!g || !g.members.includes(name)) return;
-    socket.emit('groupHistory', { groupId, messages: g.messages.slice(-100) });
+    socket.emit('groupHistory', { groupId, messages: getGroupHistory(groupId) });
   });
 
   socket.on('groupMessage', ({ groupId, text, replyTo, attachment }) => {
@@ -553,10 +767,11 @@ io.on('connection', (socket) => {
     if (!name || !g || !g.members.includes(name) || (!text && !attachment)) return;
     const msg = {
       id: uuidv4(), sender: name, text: (text || '').trim(),
-      replyTo: replyTo || null, timestamp: new Date().toISOString(),
-      type: 'group', groupId, premium: getProfile(name).premium,
+      channel: 'group', replyTo: replyTo || null, groupId, timestamp: new Date().toISOString(),
+      type: 'group', premium: getProfile(name).premium,
       attachment: attachment || null,
     };
+    storeMessage(msg);
     g.messages.push(msg);
     if (g.messages.length > 500) g.messages.shift();
     io.to(`group_${groupId}`).emit('groupMessage', msg);
@@ -568,6 +783,8 @@ io.on('connection', (socket) => {
     if (!name || !g || !g.members.includes(name)) return;
     if (!g.members.includes(memberName)) {
       g.members.push(memberName);
+      dbState.group_members.push({ id: uuidv4(), groupId, member: memberName });
+      saveDB();
       io.to(`group_${groupId}`).emit('groupUpdated', g);
       Object.entries(connectedUsers).forEach(([sid, u]) => {
         if (u.name === memberName) {
@@ -583,6 +800,8 @@ io.on('connection', (socket) => {
     const g = groupRooms[groupId];
     if (!name || !g) return;
     g.members = g.members.filter(m => m !== name);
+    dbState.group_members = dbState.group_members.filter(m => !(m.groupId === groupId && m.member === name));
+    saveDB();
     socket.leave(`group_${groupId}`);
     socket.emit('groupLeft', { groupId });
     io.to(`group_${groupId}`).emit('groupUpdated', g);
@@ -592,10 +811,12 @@ io.on('connection', (socket) => {
   socket.on('updateProfile', ({ avatar, bio, status }) => {
     const name = socket.data.name;
     if (!name) return;
+    const updates = {};
+    if (avatar !== undefined) updates.avatar = avatar;
+    if (bio !== undefined) updates.bio = bio;
+    if (status !== undefined) updates.status = status;
+    if (Object.keys(updates).length) updateProfile(name, updates);
     const p = getProfile(name);
-    if (avatar !== undefined) p.avatar = avatar;
-    if (bio    !== undefined) p.bio    = bio;
-    if (status !== undefined) p.status = status;
     io.emit('profileUpdated', { name, profile: p });
   });
 
@@ -609,32 +830,34 @@ io.on('connection', (socket) => {
     const name = socket.data.name;
     if (!name || !title) return;
     const hw = {
-      id: uuidv4(), postedBy: name, title, description,
-      subject, dueDate, timestamp: new Date().toISOString(),
-      comments: [], submissions: [],
+      id: uuidv4(), postedBy: name, title, description: description || null,
+      subject: subject || null, dueDate: dueDate || null, timestamp: new Date().toISOString(),
     };
-    homeworkStore.unshift(hw);
-    if (homeworkStore.length > 200) homeworkStore.pop();
-    io.emit('homeworkPosted', hw);
+    dbState.homework.push(hw);
+    saveDB();
+    io.emit('homeworkPosted', { ...hw, comments: [], submissions: [] });
   });
 
   socket.on('homeworkComment', ({ hwId, text }) => {
     const name = socket.data.name;
-    const hw = homeworkStore.find(h => h.id === hwId);
-    if (!name || !hw || !text) return;
-    const comment = { id: uuidv4(), sender: name, text, timestamp: new Date().toISOString() };
-    hw.comments.push(comment);
+    if (!name || !text) return;
+    const exists = dbState.homework.some(hw => hw.id === hwId);
+    if (!exists) return;
+    const comment = { id: uuidv4(), hwId, sender: name, text, timestamp: new Date().toISOString() };
+    dbState.homework_comments.push(comment);
+    saveDB();
     io.emit('homeworkComment', { hwId, comment });
   });
 
   socket.on('submitHomework', ({ hwId, text }) => {
     const name = socket.data.name;
-    const hw = homeworkStore.find(h => h.id === hwId);
-    if (!name || !hw || !text) return;
-    // Remove previous submission by same student
-    hw.submissions = hw.submissions.filter(s => s.sender !== name);
-    const sub = { id: uuidv4(), sender: name, text, timestamp: new Date().toISOString() };
-    hw.submissions.push(sub);
+    if (!name || !text) return;
+    const exists = dbState.homework.some(hw => hw.id === hwId);
+    if (!exists) return;
+    dbState.homework_submissions = dbState.homework_submissions.filter(sub => !(sub.hwId === hwId && sub.sender === name));
+    const sub = { id: uuidv4(), hwId, sender: name, text, timestamp: new Date().toISOString() };
+    dbState.homework_submissions.push(sub);
+    saveDB();
     io.emit('homeworkSubmission', { hwId, submission: sub });
   });
 
@@ -673,9 +896,16 @@ io.on('connection', (socket) => {
       return;
     }
     p.coins -= t.cost;
+    p.class_coins = p.coins;
     p.tier = tier;
     p.premium = (tier === 'premium');
     p.premiumSince = new Date().toISOString();
+    updateProfile(name, {
+      class_coins: p.class_coins,
+      tier: p.tier,
+      premium: p.premium,
+      premiumSince: p.premiumSince,
+    });
     console.log(`${t.emoji} ${name} purchased ${t.label}`);
     socket.emit('tierUnlocked', { tier, tierLabel: t.label, emoji: t.emoji, profile: p });
     io.emit('profileUpdated', { name, profile: p });
@@ -690,16 +920,17 @@ io.on('connection', (socket) => {
     const t = TIERS.premium;
     if (p.tier === 'premium') { socket.emit('tierError', 'You already have Premium!'); return; }
     if (p.coins < t.cost) { socket.emit('tierError', `You need ${t.cost} coins. You have ${p.coins}. Keep studying!`); return; }
-    p.coins -= t.cost; p.tier = 'premium'; p.premium = true;
+    p.coins -= t.cost;
+    p.class_coins = p.coins;
+    p.tier = 'premium';
+    p.premium = true;
     p.premiumSince = new Date().toISOString();
-    socket.emit('tierUnlocked', { tier: 'premium', tierLabel: '5G Premium', emoji: '⭐', profile: p });
-    io.emit('profileUpdated', { name, profile: p });
-  });
-
-  socket.on('getCoins', () => {
-    const name = socket.data.name;
-    if (!name) return;
-    const p = getProfile(name);
+    updateProfile(name, {
+      class_coins: p.class_coins,
+      tier: p.tier,
+      premium: p.premium,
+      premiumSince: p.premiumSince,
+    });
     socket.emit('coinsData', { coins: p.coins, premium: p.premium, studyMinutes: p.studyMinutes });
   });
 
@@ -708,71 +939,101 @@ io.on('connection', (socket) => {
     const from = socket.data.name;
     if (!from) return;
 
-    // Validate recipient
-    const recipient = STUDENTS.find(s => s.name === to);
-    if (!recipient) {
-      socket.emit('transferResult', { ok: false, error: `❌ "${to}" is not a valid classmate.` });
+    const recipients = Array.isArray(to) ? to : [to];
+    const validRecipients = recipients.filter(name => typeof name === 'string' && name.trim());
+    if (!validRecipients.length) {
+      socket.emit('transferResult', { ok: false, error: '❌ Please choose at least one classmate.' });
       return;
     }
-    if (from === to) {
+
+    const uniqueRecipients = [...new Set(validRecipients)];
+    if (uniqueRecipients.length !== validRecipients.length) {
+      socket.emit('transferResult', { ok: false, error: '❌ Please select each classmate only once.' });
+      return;
+    }
+    if (uniqueRecipients.includes(from)) {
       socket.emit('transferResult', { ok: false, error: '❌ You cannot send coins to yourself.' });
       return;
     }
 
-    // Validate amount
+    const invalid = uniqueRecipients.find(name => !STUDENTS.some(s => s.name === name));
+    if (invalid) {
+      socket.emit('transferResult', { ok: false, error: `❌ "${invalid}" is not a valid classmate.` });
+      return;
+    }
+
     const amt = Math.floor(Number(amount));
     if (!amt || amt <= 0 || isNaN(amt)) {
       socket.emit('transferResult', { ok: false, error: '❌ Please enter a valid amount.' });
       return;
     }
     if (amt > 1000000) {
-      socket.emit('transferResult', { ok: false, error: '❌ Maximum transfer is 1,000,000 coins.' });
+      socket.emit('transferResult', { ok: false, error: '❌ Maximum transfer per person is 1,000,000 coins.' });
       return;
     }
 
-    const senderProfile    = getProfile(from);
-    const recipientProfile = getProfile(to);
-
-    // Insufficient funds check
-    if (senderProfile.coins < amt) {
-      const shortBy = amt - senderProfile.coins;
+    const senderProfile = getProfile(from);
+    const totalCost = amt * uniqueRecipients.length;
+    if (senderProfile.coins < totalCost) {
+      const shortBy = totalCost - senderProfile.coins;
       socket.emit('transferResult', {
         ok: false,
-        error: `❌ Insufficient funds! You need ${shortBy.toLocaleString()} more 🪙 to complete this transfer.`,
+        error: `❌ Insufficient funds! You need ${shortBy.toLocaleString()} more 🪙 to send ${amt.toLocaleString()} to ${uniqueRecipients.length} classmate${uniqueRecipients.length===1?'':'s'}.`,
         balance: senderProfile.coins,
       });
       return;
     }
 
-    // Execute transfer
-    senderProfile.coins    -= amt;
-    recipientProfile.coins += amt;
+    const transferTx = (sender, recipients, amount) => {
+      const senderRow = dbState.students.find(s => s.name === sender);
+      if (!senderRow) return;
+      senderRow.class_coins = (senderRow.class_coins || 0) - amount * recipients.length;
+      senderRow.coins = (senderRow.coins || 0) - amount * recipients.length;
+      recipients.forEach(recipient => {
+        const recipientRow = dbState.students.find(s => s.name === recipient);
+        if (recipientRow) {
+          recipientRow.class_coins = (recipientRow.class_coins || 0) + amount;
+          recipientRow.coins = (recipientRow.coins || 0) + amount;
+        }
+      });
+      saveDB();
+    };
 
-    console.log(`💸 ${from} sent ${amt} coins to ${to} | ${from}: ${senderProfile.coins} | ${to}: ${recipientProfile.coins}`);
+    try {
+      transferTx(from, uniqueRecipients, amt);
+    } catch (err) {
+      socket.emit('transferResult', { ok: false, error: '❌ Transfer failed. Please try again.' });
+      return;
+    }
 
-    // Notify sender
+    const updatedSender = getProfile(from);
+    console.log(`💸 ${from} sent ${amt} coins each to ${uniqueRecipients.join(', ')} | ${from}: ${updatedSender.coins}`);
+
     socket.emit('transferResult', {
       ok: true,
-      message: `✅ Successfully sent ${amt.toLocaleString()} 🪙 to ${to}!`,
-      newBalance: senderProfile.coins,
-      to, amount: amt,
+      message: `✅ Successfully sent ${amt.toLocaleString()} 🪙 each to ${uniqueRecipients.length} classmate${uniqueRecipients.length===1?'':'s'}!`,
+      newBalance: updatedSender.coins,
+      to: uniqueRecipients,
+      amount: amt,
     });
 
-    // Notify recipient if online
-    Object.entries(connectedUsers).forEach(([sid, u]) => {
-      if (u.name === to) {
-        io.to(sid).emit('coinsReceived', {
-          from, amount: amt,
-          newBalance: recipientProfile.coins,
-          message: `💸 ${from} sent you ${amt.toLocaleString()} 🪙!`,
-        });
-        io.to(sid).emit('profileData', { name: to, profile: recipientProfile });
-      }
+    uniqueRecipients.forEach(name => {
+      const recipientProfile = getProfile(name);
+      Object.entries(connectedUsers).forEach(([sid, u]) => {
+        if (u.name === name) {
+          io.to(sid).emit('coinsReceived', {
+            from,
+            amount: amt,
+            newBalance: recipientProfile.coins,
+            message: `💸 ${from} sent you ${amt.toLocaleString()} 🪙!`,
+          });
+          io.to(sid).emit('profileData', { name, profile: recipientProfile });
+        }
+      });
+      io.emit('profileUpdated', { name, profile: recipientProfile });
     });
 
-    // Broadcast updated profiles
-    io.emit('profileUpdated', { name: from, profile: senderProfile });
-    io.emit('profileUpdated', { name: to,   profile: recipientProfile });
+    io.emit('profileUpdated', { name: from, profile: updatedSender });
   });
 
   // ── Video call signalling (WebRTC) ────────────────────────────────────────
