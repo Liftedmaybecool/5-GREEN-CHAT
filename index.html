@@ -360,6 +360,7 @@ input,textarea,select{font-family:inherit}
 /* Messages */
 .messages{flex:1;overflow-y:auto;padding:12px 16px;display:flex;flex-direction:column;gap:0}
 .msg-row{display:flex;gap:9px;align-items:flex-start;padding:3px 4px;border-radius:10px;transition:background .12s}
+.msg-row[data-hidden="true"]{display:none!important}
 .msg-row:hover{background:rgba(0,245,255,.025)}
 .msg-row.own{flex-direction:row-reverse}
 .msg-row.sys-row{justify-content:center;padding:6px 0}
@@ -407,13 +408,21 @@ input,textarea,select{font-family:inherit}
   background:rgba(0,245,255,.04);border-radius:0 7px 7px 0;margin-bottom:5px;
 }
 .reply-snip strong{color:var(--neon-cyan)}
-.msg-acts{display:none;gap:3px;align-items:center;margin-top:4px}
+.msg-acts{display:none;gap:3px;align-items:center;margin-top:4px;flex-wrap:wrap}
 .msg-row:hover .msg-acts{display:flex}
 .act-btn{
   background:rgba(0,245,255,.06);border:1px solid rgba(0,245,255,.15);
   border-radius:6px;color:var(--text2);padding:3px 8px;font-size:.68rem;transition:all .15s;
 }
 .act-btn:hover{background:rgba(0,245,255,.14);color:var(--neon-cyan);border-color:var(--neon-cyan);box-shadow:0 0 8px rgba(0,245,255,.15)}
+.reaction-row{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}
+.reaction-pill{display:inline-flex;align-items:center;gap:4px;padding:3px 7px;border-radius:999px;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);color:var(--text2);font-size:.68rem;cursor:pointer;transition:all .15s}
+.reaction-pill:hover{transform:translateY(-1px);border-color:rgba(0,245,255,.2)}
+.reaction-pill.active{background:rgba(0,245,255,.14);color:var(--neon-cyan);border-color:rgba(0,245,255,.3)}
+.pinned-host{margin:0 0 8px;padding:10px 12px;border:1px solid rgba(251,191,36,.18);background:rgba(251,191,36,.08);border-radius:12px;color:var(--text2);font-size:.78rem}
+.pinned-host .pin-title{font-size:.68rem;color:var(--neon-yellow);text-transform:uppercase;letter-spacing:1px;margin-bottom:3px;font-weight:700}
+.tiny-search{width:150px;background:rgba(0,245,255,.06);border:1px solid rgba(0,245,255,.14);border-radius:999px;color:var(--text);padding:6px 10px;font-size:.72rem;outline:none}
+.tiny-search:focus{border-color:var(--neon-cyan);box-shadow:0 0 10px rgba(0,245,255,.12)}
 .typing-bar{padding:2px 16px 5px;font-size:.7rem;color:var(--text3);min-height:20px}
 .tdots{display:inline-flex;gap:3px;margin-left:5px;vertical-align:middle}
 .tdots span{width:4px;height:4px;border-radius:50%;background:var(--neon-cyan);display:inline-block;animation:bounce .9s infinite;box-shadow:0 0 4px var(--neon-cyan)}
@@ -524,7 +533,46 @@ input,textarea,select{font-family:inherit}
 /* SECTIONS */
 .section{display:none;flex:1;flex-direction:column;overflow:hidden}
 .section.active{display:flex}
-/* MEMBERS PANEL */
+/* LOGIN / APP STATE */
+.login-screen{display:flex;align-items:center;justify-content:center;min-height:100vh;padding:24px;background:radial-gradient(circle at top left,rgba(0,245,255,.15),transparent 34%),radial-gradient(circle at bottom right,rgba(191,0,255,.18),transparent 30%),var(--bg);position:relative;overflow:hidden}
+.login-screen::before{content:'';position:absolute;inset:0;background:linear-gradient(135deg,rgba(255,255,255,.04),transparent 45%,rgba(0,245,255,.06));pointer-events:none}
+.login-shell{width:min(980px,100%);display:grid;grid-template-columns:1.1fr .9fr;gap:18px;align-items:center;position:relative;z-index:1}
+.login-hero{background:rgba(0,3,12,.72);border:1px solid rgba(0,245,255,.14);backdrop-filter:blur(16px);border-radius:24px;padding:24px 24px 22px;box-shadow:0 12px 40px rgba(0,0,0,.22)}
+.hero-pill{display:inline-flex;align-items:center;gap:6px;padding:6px 10px;border-radius:999px;background:rgba(0,245,255,.08);border:1px solid rgba(0,245,255,.16);color:var(--neon-cyan);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px}
+.login-hero h1{font-size:clamp(1.35rem,2.5vw,2rem);font-weight:800;margin:12px 0 8px;color:var(--text)}
+.login-hero p{font-size:.92rem;color:var(--text2);line-height:1.65;margin-bottom:12px}
+.hero-stats{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.hero-stats span{padding:7px 10px;border-radius:999px;background:rgba(255,255,255,.05);border:1px solid rgba(255,255,255,.08);font-size:.77rem;color:var(--text2)}
+.login-card{background:rgba(7,10,24,.88);border:1px solid rgba(255,255,255,.12);border-radius:22px;padding:24px;box-shadow:0 18px 60px rgba(0,0,0,.28)}
+.login-card h2{font-size:1.16rem;font-weight:800;margin-bottom:12px;color:var(--text)}
+.login-card .fg{margin-bottom:10px}
+.login-card .fg label{display:block;font-size:.76rem;font-weight:700;color:var(--neon-cyan);margin-bottom:6px;text-transform:uppercase;letter-spacing:1px}
+.login-card select,.login-card input{width:100%;background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.12);border-radius:10px;color:var(--text);padding:10px 11px;font-size:.9rem;outline:none;transition:all .2s}
+.login-card select:focus,.login-card input:focus{border-color:var(--neon-cyan);box-shadow:0 0 0 2px rgba(0,245,255,.1)}
+.login-btn{width:100%;border:none;border-radius:12px;padding:11px 14px;font-size:.95rem;font-weight:800;background:linear-gradient(135deg,var(--neon-cyan),var(--neon-blue));color:#04202f;box-shadow:0 0 18px rgba(0,245,255,.18);transition:all .2s}
+.login-btn:hover{transform:translateY(-1px);box-shadow:0 0 24px rgba(0,245,255,.24)}
+.login-btn.is-busy{opacity:.75;cursor:wait;transform:none}
+.forgot-btn{display:block;width:100%;margin-top:8px;background:transparent;border:none;color:var(--text3);font-size:.8rem;padding:8px 0}
+.forgot-btn:hover{color:var(--neon-cyan)}
+.login-footer{margin-top:12px;font-size:.72rem;color:var(--text3);text-align:center;line-height:1.5}
+.app-loading{position:fixed;inset:0;background:rgba(2,5,12,.9);backdrop-filter:blur(10px);display:flex;align-items:center;justify-content:center;z-index:1200;transition:opacity .25s ease}
+.app-loading.hidden{opacity:0;pointer-events:none}
+.loading-card{background:rgba(7,10,24,.9);border:1px solid rgba(0,245,255,.2);border-radius:20px;padding:24px 28px;text-align:center;max-width:340px;box-shadow:0 20px 60px rgba(0,0,0,.35)}
+.loading-spinner{width:42px;height:42px;border-radius:50%;border:3px solid rgba(0,245,255,.18);border-top-color:var(--neon-cyan);margin:0 auto 12px;animation:spin 1s linear infinite}
+.loading-card h3{font-size:1rem;font-weight:800;margin-bottom:6px}
+.loading-card p{font-size:.82rem;color:var(--text2);line-height:1.5}
+.conn-badge{display:inline-flex;align-items:center;gap:7px;padding:6px 10px;border-radius:999px;border:1px solid rgba(255,255,255,.12);background:rgba(255,255,255,.06);font-size:.74rem;font-weight:700;color:var(--text2)}
+.conn-badge .dot{width:8px;height:8px;border-radius:50%;background:var(--neon-yellow);box-shadow:0 0 8px rgba(255,230,0,.35)}
+.conn-badge.connected{border-color:rgba(74,222,128,.2);color:var(--neon-green)}
+.conn-badge.connected .dot{background:var(--neon-green);box-shadow:0 0 8px rgba(74,222,128,.3)}
+.conn-badge.reconnecting,.conn-badge.disconnected{border-color:rgba(255,45,120,.2);color:var(--neon-pink)}
+.conn-badge.reconnecting .dot,.conn-badge.disconnected .dot{background:var(--neon-pink);box-shadow:0 0 8px rgba(255,45,120,.28)}
+.conn-banner{display:none;position:fixed;top:14px;right:16px;z-index:1100;padding:10px 13px;border-radius:12px;background:rgba(7,10,24,.92);border:1px solid rgba(255,45,120,.24);color:var(--neon-pink);font-size:.78rem;box-shadow:0 12px 32px rgba(0,0,0,.22)}
+.conn-banner.show{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+@media (max-width:1100px){.login-shell{grid-template-columns:1fr;max-width:620px}.login-hero{text-align:center}.hero-stats{justify-content:center}}
+@media (max-width:860px){.app-body{flex-direction:column}.sidebar{width:100%;flex-direction:row;flex-wrap:wrap;justify-content:center;padding:8px 10px;border-right:none;border-bottom:1px solid rgba(0,245,255,.1)}.panel{width:100%;max-height:260px;border-right:none;border-bottom:1px solid rgba(0,245,255,.1)}.members-panel{display:none}.topbar{flex-wrap:wrap;gap:8px}.topbar-right{margin-left:auto;flex-wrap:wrap;justify-content:flex-end}}
+@media (max-width:640px){.topbar{padding:10px 12px}.topbar-left{gap:6px}.tb-logo{font-size:.85rem}.tb-badge{display:none}.topbar-right{width:100%;justify-content:flex-end}.login-screen{padding:14px}.login-card,.login-hero{padding:18px}.login-hero h1{font-size:1.25rem}.messages{padding:10px 12px}.bubble{font-size:.8rem}.input-box{padding:7px 8px}.chat-hdr{padding:10px 12px;min-height:auto}.chat-hdr h2{font-size:.85rem}.msg-body{max-width:82%}}
 .members-panel{width:188px;background:var(--bg2);border-left:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0}
 .members-panel h4{font-size:.61rem;color:var(--text3);text-transform:uppercase;letter-spacing:1.5px;padding:11px 11px 5px}
 .m-item{display:flex;align-items:center;gap:7px;padding:5px 10px;cursor:pointer;border-radius:7px;margin:0 3px;transition:background .15s}
@@ -715,39 +763,57 @@ input,textarea,select{font-family:inherit}
 </style>
 </head>
 <body>
+<div id="appLoading" class="app-loading">
+  <div class="loading-card">
+    <div class="loading-spinner"></div>
+    <h3>Connecting to Classmates Chat</h3>
+    <p id="loadingText">Preparing your classroom space…</p>
+  </div>
+</div>
+<div id="connBanner" class="conn-banner"></div>
 
 <!-- ═══ LOGIN SCREEN ═══ -->
-<div id="loginScreen">
-  <div class="logo-row"><span class="logo-icon">🟢</span><span class="logo-text">CLASSMATES CHAT</span></div>
-  <div class="logo-sub">Classmates Communication Platform</div>
-  <div class="login-card">
-    <h2>Welcome back 👋  Sign in to continue</h2>
-    <div class="fg">
-      <label>Your Name</label>
-      <select id="nameSelect">
-        <option value="">— Choose your name —</option>
-        <option>Toni Macauly</option><option>Oghenetejiri Ogheneochukwu</option>
-        <option>Joanna Bogoro</option><option>Ama-Abasi Benson</option>
-        <option>Oluyemi Sosan</option><option>Aisha Adeniyi</option>
-        <option>Elissa Ojei</option><option>Kwame Sagoe</option>
-        <option>Oluwafeyikunmi Osunsedo</option><option>Olayomade King</option>
-        <option>Anthonia Celey Okogun</option><option>Netochi Anichebe</option>
-        <option>Ishaq Babalola</option><option>Eliora Ighodalo</option>
-        <option>Oluwanifesimi Thomas</option><option>Ereremena Orife</option>
-        <option>✨ Petnan Fwangkwal</option><option>Fareedah Ibrahim</option>
-        <option>Tamunomiebi Miebaga</option><option>Adedamola Egbonwon</option>
-        <option>Fievaoghene Atebe</option><option>Ethan Adeleke</option>
-        <option>Test Person</option>
-      </select>
+<div id="loginScreen" class="login-screen">
+  <div class="login-shell">
+    <div class="login-hero">
+      <div class="hero-pill">✨ Connected classroom</div>
+      <h1>Welcome back to your class hub</h1>
+      <p>Jump into general chat, private DMs, homework, coins, and AI help from one polished space.</p>
+      <div class="hero-stats">
+        <span>💬 Live chat</span>
+        <span>📚 Study help</span>
+        <span>🪙 Class coins</span>
+      </div>
     </div>
-    <div class="fg">
-      <label>Password</label>
-      <input type="password" id="passInput" placeholder="Enter your password"/>
+    <div class="login-card">
+      <h2>Sign in to continue</h2>
+      <div class="fg">
+        <label>Your Name</label>
+        <select id="nameSelect">
+          <option value="">— Choose your name —</option>
+          <option>Toni Macauly</option><option>Oghenetejiri Ogheneochukwu</option>
+          <option>Joanna Bogoro</option><option>Ama-Abasi Benson</option>
+          <option>Oluyemi Sosan</option><option>Aisha Adeniyi</option>
+          <option>Elissa Ojei</option><option>Kwame Sagoe</option>
+          <option>Oluwafeyikunmi Osunsedo</option><option>Olayomade King</option>
+          <option>Anthonia Celey Okogun</option><option>Netochi Anichebe</option>
+          <option>Ishaq Babalola</option><option>Eliora Ighodalo</option>
+          <option>Oluwanifesimi Thomas</option><option>Ereremena Orife</option>
+          <option>✨ Petnan Fwangkwal</option><option>Fareedah Ibrahim</option>
+          <option>Tamunomiebi Miebaga</option><option>Adedamola Egbonwon</option>
+          <option>Fievaoghene Atebe</option><option>Ethan Adeleke</option>
+          <option>Test Person</option>
+        </select>
+      </div>
+      <div class="fg">
+        <label>Password</label>
+        <input type="password" id="passInput" placeholder="Enter your password"/>
+      </div>
+      <div class="login-err" id="loginErr"></div>
+      <button id="loginBtn" class="login-btn" onclick="doLogin()">Sign In →</button>
+      <button class="forgot-btn" onclick="openForgot()">Forgot Password? Ask Petnan</button>
+      <div class="login-footer">🟢 Classmates Chat — Only for 5 Green students · Powered by Classmates AI</div>
     </div>
-    <div class="login-err" id="loginErr"></div>
-    <button class="login-btn" onclick="doLogin()">Sign In →</button>
-    <button class="forgot-btn" onclick="openForgot()">Forgot Password? Ask Petnan</button>
-    <div class="login-footer">🟢 Classmates Chat — Only for 5 Green students · Powered by Classmates AI</div>
   </div>
 </div>
 
@@ -762,6 +828,8 @@ input,textarea,select{font-family:inherit}
       <span class="pm-badge" id="pmBadge">⭐ PREMIUM</span>
     </div>
     <div class="topbar-right">
+      <div id="connBadge" class="conn-badge">● Connecting…</div>
+      <button id="installBtn" class="tb-btn" onclick="promptInstall()" style="display:none">📱 Install</button>
       <div class="coin-pill" id="coinPill" onclick="showSection('coins')" title="Your Class Coins">🪙 <span id="coinCount">0</span></div>
       <button class="tb-btn" onclick="showSection('settings')">⚙ Settings</button>
       <button class="tb-btn" onclick="doLogout()">Sign Out</button>
@@ -853,7 +921,8 @@ input,textarea,select{font-family:inherit}
         <div class="section active" id="section-general">
           <div class="chat-hdr">
             <div class="chat-hdr-l"><div><h2># general</h2><p id="genSub">All 22 students of 5 Green</p></div></div>
-            <div style="display:flex;gap:6px">
+            <div style="display:flex;gap:6px;align-items:center">
+              <input id="generalSearch" class="tiny-search" placeholder="Search chat…" oninput="filterMessages('generalMsgs', this.value)">
               <button class="hdr-btn" onclick="toggleMembers()">👥 Members</button>
             </div>
           </div>
@@ -868,7 +937,7 @@ input,textarea,select{font-family:inherit}
               <button class="attach-btn" onclick="document.getElementById('genFile').click()" title="Attach file">📎</button>
               <input type="file" id="genFile" style="display:none" multiple accept="*/*" onchange="previewFiles(this,'gen')"/>
               <textarea id="genInput" placeholder="Message #general…" rows="1"
-                onkeydown="handleKey(event,'gen')" oninput="autoGrow(this);emitTyping('general')"></textarea>
+                onkeydown="handleKey(event,'gen')" oninput="autoGrow(this);emitTyping('general');saveDraft('general', this.value)"></textarea>
               <button class="send-btn" onclick="sendGeneral()">➤</button>
             </div>
             <div class="file-preview-strip" id="genPreview" style="display:none"></div>
@@ -882,7 +951,8 @@ input,textarea,select{font-family:inherit}
               <div id="dmHdrAv" class="msg-av" style="width:36px;height:36px"></div>
               <div><h2 id="dmHdrName">Select a classmate</h2><p id="dmHdrStatus"></p></div>
             </div>
-            <div style="display:flex;gap:6px" id="dmHdrBtns" style="display:none">
+            <div style="display:flex;gap:6px;align-items:center" id="dmHdrBtns" style="display:none">
+              <input id="dmSearch" class="tiny-search" placeholder="Search chat…" oninput="filterMessages('dmMsgs', this.value)">
               <button class="hdr-btn" onclick="startCall(false)">📞 Call</button>
               <button class="hdr-btn" onclick="startCall(true)">🎥 Video Call</button>
             </div>
@@ -903,7 +973,7 @@ input,textarea,select{font-family:inherit}
               <button class="attach-btn" onclick="document.getElementById('dmFile').click()" title="Attach file">📎</button>
               <input type="file" id="dmFile" style="display:none" multiple accept="*/*" onchange="previewFiles(this,'dm')"/>
               <textarea id="dmInput" placeholder="Message…" rows="1"
-                onkeydown="handleKey(event,'dm')" oninput="autoGrow(this);emitTyping('dm')"></textarea>
+                onkeydown="handleKey(event,'dm')" oninput="autoGrow(this);emitTyping('dm');saveDraft('dm', this.value)"></textarea>
               <button class="send-btn" onclick="sendDM()">➤</button>
             </div>
             <div class="file-preview-strip" id="dmPreview" style="display:none"></div>
@@ -914,7 +984,8 @@ input,textarea,select{font-family:inherit}
         <div class="section" id="section-groups">
           <div class="chat-hdr">
             <div class="chat-hdr-l"><div><h2 id="grpHdrName">Select a group</h2><p id="grpHdrSub"></p></div></div>
-            <div style="display:flex;gap:6px">
+            <div style="display:flex;gap:6px;align-items:center">
+              <input id="groupSearchBox" class="tiny-search" placeholder="Search chat…" oninput="filterMessages('groupMsgs', this.value)">
               <button class="hdr-btn" id="grpAddBtn" onclick="openAddMember()" style="display:none">➕ Add Member</button>
               <button class="hdr-btn" id="grpLeaveBtn" onclick="leaveGroup()" style="display:none">🚪 Leave</button>
             </div>
@@ -935,7 +1006,7 @@ input,textarea,select{font-family:inherit}
               <button class="attach-btn" onclick="document.getElementById('grpFile').click()" title="Attach file">📎</button>
               <input type="file" id="grpFile" style="display:none" multiple accept="*/*" onchange="previewFiles(this,'grp')"/>
               <textarea id="grpInput" placeholder="Message group…" rows="1"
-                onkeydown="handleKey(event,'grp')" oninput="autoGrow(this);emitTyping('group')"></textarea>
+                onkeydown="handleKey(event,'grp')" oninput="autoGrow(this);emitTyping('group');saveDraft('groups', this.value)"></textarea>
               <button class="send-btn" onclick="sendGroup()">➤</button>
             </div>
             <div class="file-preview-strip" id="grpPreview" style="display:none"></div>
@@ -949,9 +1020,12 @@ input,textarea,select{font-family:inherit}
               <div style="width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#4c1d95,#7c3aed,#a78bfa);border:2px solid rgba(167,139,250,.5);display:flex;align-items:center;justify-content:center;font-size:1.15rem;box-shadow:0 0 12px rgba(167,139,250,.4);flex-shrink:0">🤖</div>
               <div><h2>Classmates AI</h2><p>All-knowing · Super-smart · Always helpful</p></div>
             </div>
-            <button class="hdr-btn" onclick="continueAI()">➡ Continue</button>
-            <button class="hdr-btn" onclick="openAIFavorites()">⭐ Favorites</button>
-            <button class="hdr-btn" onclick="clearAIChat()">🗑 Clear</button>
+            <div style="display:flex;gap:6px;align-items:center">
+              <input id="aiSearch" class="tiny-search" placeholder="Search chat…" oninput="filterMessages('aiMsgs', this.value)">
+              <button class="hdr-btn" onclick="continueAI()">➡ Continue</button>
+              <button class="hdr-btn" onclick="openAIFavorites()">⭐ Favorites</button>
+              <button class="hdr-btn" onclick="clearAIChat()">🗑 Clear</button>
+            </div>
           </div>
           <div class="messages" id="aiMsgs">
             <div id="aiWelcome" style="text-align:center;padding:36px 20px;color:var(--text3);max-width:480px;margin:0 auto">
@@ -977,7 +1051,7 @@ input,textarea,select{font-family:inherit}
                 accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.txt,.csv,.xls,.xlsx,.ppt,.pptx,.zip"
                 onchange="previewFiles(this,'ai')"/>
               <textarea id="aiInput" placeholder="Ask Classmates AI anything, or attach a file to analyse…" rows="1"
-                onkeydown="handleKey(event,'ai')" oninput="autoGrow(this)"></textarea>
+                onkeydown="handleKey(event,'ai')" oninput="autoGrow(this);saveDraft('ai', this.value)"></textarea>
               <button class="send-btn" id="aiSendBtn" onclick="sendAI()">➤</button>
             </div>
           </div>
@@ -1011,7 +1085,7 @@ input,textarea,select{font-family:inherit}
                   accept="image/*,video/*,audio/*,application/pdf,.doc,.docx,.txt,.csv"
                   onchange="previewFilesStudy(this)"/>
                 <textarea id="studyInput" placeholder="Ask about any subject, or attach a file to analyse…" rows="1"
-                  onkeydown="handleKey(event,'study')" oninput="autoGrow(this)"></textarea>
+                  onkeydown="handleKey(event,'study')" oninput="autoGrow(this);saveDraft('study', this.value)"></textarea>
                 <button class="send-btn" id="studySendBtn" onclick="sendStudyAI()">➤</button>
               </div>
             </div>
@@ -1384,6 +1458,11 @@ let groupFilter = '';
 let aiFavorites = [];
 let aiMessageTexts = {};
 let lastAIMessageId = null;
+let drafts = { general:'', dm:'', groups:'', ai:'', study:'' };
+let pinnedMessages = {};
+let deferredInstallPrompt = null;
+let unreadCount = 0;
+let notificationPermissionAsked = false;
 
 // ═══════════════════════════════════════
 // HELPERS
@@ -1457,12 +1536,95 @@ function continueAI(){
   sendAI();
 }
 
+function saveDraftState(){
+  localStorage.setItem('classmatesDrafts', JSON.stringify({ drafts, pinnedMessages }));
+}
+function loadDraftState(){
+  try{
+    const raw = JSON.parse(localStorage.getItem('classmatesDrafts') || '{}');
+    if(raw.drafts) drafts = { ...drafts, ...raw.drafts };
+    if(raw.pinnedMessages) pinnedMessages = raw.pinnedMessages;
+  } catch(e) {}
+}
+function saveDraft(channel, value){
+  drafts[channel] = value || '';
+  saveDraftState();
+}
+function restoreDrafts(){
+  const map = { general:'genInput', dm:'dmInput', groups:'grpInput', ai:'aiInput', study:'studyInput' };
+  Object.entries(map).forEach(([key, id])=>{
+    const el=document.getElementById(id);
+    if(el && drafts[key]){ el.value=drafts[key]; autoGrow(el); }
+  });
+}
+function filterMessages(containerId, query){
+  const c=document.getElementById(containerId);
+  if(!c) return;
+  const term=(query||'').trim().toLowerCase();
+  c.querySelectorAll('.msg-row').forEach(row=>{
+    const matches = !term || row.textContent.toLowerCase().includes(term);
+    row.dataset.hidden = matches ? 'false' : 'true';
+    row.style.display = matches ? '' : 'none';
+  });
+}
 function showToast(msg, type=''){
   const t=document.createElement('div');
   t.className='toast'+(type?' '+type:'');
   t.textContent=msg;
   document.body.appendChild(t);
   setTimeout(()=>t.remove(),3200);
+}
+function bumpUnread(){
+  unreadCount += 1;
+  document.title = unreadCount > 0 ? `(${unreadCount}) Classmates Chat` : 'Classmates Chat';
+}
+function clearUnreadBadge(){
+  unreadCount = 0;
+  document.title = 'Classmates Chat';
+}
+function ensurePinnedHost(containerId){
+  const c=document.getElementById(containerId);
+  if(!c) return null;
+  let host = c.querySelector('.pinned-host');
+  if(!host){
+    host=document.createElement('div');
+    host.className='pinned-host';
+    c.prepend(host);
+  }
+  return host;
+}
+function renderPinnedBanner(containerId){
+  const host=ensurePinnedHost(containerId);
+  if(!host) return;
+  const key = containerId==='generalMsgs' ? 'general' : containerId==='dmMsgs' ? 'dm' : containerId==='groupMsgs' ? 'groups' : containerId==='aiMsgs' ? 'ai' : containerId==='studyMsgs' ? 'study' : null;
+  const pin = key ? pinnedMessages[key] : null;
+  if(!pin){ host.innerHTML=''; host.style.display='none'; return; }
+  host.style.display='block';
+  host.innerHTML=`<div class="pin-title">📌 Pinned message</div><div style="color:var(--text);font-weight:600">${esc(pin.sender)} · ${esc(pin.text||'Attachment')}</div><div style="font-size:.68rem;color:var(--text3);margin-top:3px">${fmt(pin.timestamp)}</div>`;
+}
+function togglePin(channel, id, sender, text, timestamp){
+  const key = channel==='gen' ? 'general' : channel==='dm' ? 'dm' : channel==='grp' ? 'groups' : channel==='ai' ? 'ai' : channel;
+  const current = pinnedMessages[key];
+  if(current && current.id===id){ delete pinnedMessages[key]; showToast('📌 Pinned message removed.'); }
+  else { pinnedMessages[key]={id,sender,text: text||'', timestamp}; showToast('📌 Message pinned.'); }
+  saveDraftState();
+  const containerId = channel==='gen' ? 'generalMsgs' : channel==='dm' ? 'dmMsgs' : channel==='grp' ? 'groupMsgs' : channel==='ai' ? 'aiMsgs' : 'studyMsgs';
+  renderPinnedBanner(containerId);
+}
+function requestNotifications(){
+  if(notificationPermissionAsked || !('Notification' in window)) return;
+  notificationPermissionAsked = true;
+  if(Notification.permission === 'granted') return;
+  if(Notification.permission !== 'denied') Notification.requestPermission().catch(()=>{});
+}
+function pushNotification(title, body){
+  if(!('Notification' in window) || Notification.permission !== 'granted') return;
+  if(document.visibilityState === 'visible') return;
+  new Notification(title, { body, icon: '/icons/icon-192.svg' });
+}
+function promptInstall(){
+  if(deferredInstallPrompt){ deferredInstallPrompt.prompt(); }
+  else { showToast('Install is available from your browser menu on mobile.'); }
 }
 
 function avatarEl(name, size='33px'){
@@ -1800,6 +1962,7 @@ function buildMsg(msg, channel){
   const isSys = msg.type === 'system';
 
   const row = document.createElement('div');
+  row.dataset.msgId = msg.id;
   if(isSys){
     row.className='msg-row sys-row';
     row.innerHTML=`<div class="bubble b-sys">${esc(msg.text)}</div>`;
@@ -1820,9 +1983,21 @@ function buildMsg(msg, channel){
       <button class="act-btn ai-fav-btn" data-ai-fav-id="${attr(msg.id)}" onclick="toggleAIFavorite('${attr(msg.id)}')">⭐ Save</button>
     </div>` : '';
 
+  const reactionButtons = ['👍','❤️','😂','🎉','🔥','🙏'];
+  const reactions = msg.reactions || {};
+  const reactionHTML = `
+    <div class="reaction-row">
+      ${reactionButtons.map(emoji => {
+        const users = reactions[emoji] || [];
+        const active = users.includes(ME);
+        return `<button class="reaction-pill${active ? ' active' : ''}" onclick="toggleReaction('${channel}','${attr(msg.id)}','${emoji}')">${emoji} ${users.length || ''}</button>`;
+      }).join('')}
+    </div>`;
+
   const actHTML = !isAI ? `
     <div class="msg-acts">
       <button class="act-btn" onclick="setReply('${channel}','${attr(msg.sender)}','${attr((msg.text||'').substring(0,60))}')">↩ Reply</button>
+      <button class="act-btn" onclick="togglePin('${channel}','${attr(msg.id)}','${attr(msg.sender)}','${attr((msg.text||'').substring(0,100))}','${attr(msg.timestamp)}')">📌 Pin</button>
     </div>` : favHTML;
 
   // Only show bubble if there is actual text content
@@ -1840,6 +2015,7 @@ function buildMsg(msg, channel){
     </div>
     ${replyHTML}
     ${bubbleHTML}
+    ${reactionHTML}
     ${actHTML}`;
 
   // Render attachment below the bubble
@@ -1858,6 +2034,7 @@ function appendMsg(containerId, msg, channel){
   const c=document.getElementById(containerId);
   if(!c) return;
   c.appendChild(buildMsg(msg,channel));
+  renderPinnedBanner(containerId);
   scrollBottom(containerId);
 }
 
@@ -1891,12 +2068,76 @@ function emitTyping(channel){
   clearTimeout(typingT);
   typingT=setTimeout(()=>socket.emit('stopTyping',{channel}),2000);
 }
+function toggleReaction(channel, messageId, emoji){
+  if(!ME) return;
+  socket.emit('toggleReaction',{channel,messageId,emoji});
+}
 </script>
 
 <script>
 // ═══════════════════════════════════════
 // LOGIN / LOGOUT
 // ═══════════════════════════════════════
+function setConnectionState(state, message){
+  const badge=document.getElementById('connBadge');
+  const banner=document.getElementById('connBanner');
+  if(badge){
+    badge.className='conn-badge '+state;
+    if(state==='connected'){ badge.innerHTML='<span class="dot"></span> Connected'; }
+    else if(state==='reconnecting'){ badge.innerHTML='<span class="dot"></span> Reconnecting…'; }
+    else if(state==='disconnected'){ badge.innerHTML='<span class="dot"></span> Offline'; }
+    else { badge.innerHTML='<span class="dot"></span> Connecting…'; }
+  }
+  if(banner){
+    banner.classList.toggle('show', !!message);
+    if(message){ banner.textContent=message; }
+    else { banner.textContent=''; }
+  }
+}
+
+function setLoginBusy(isBusy){
+  const btn=document.getElementById('loginBtn');
+  if(btn){
+    btn.disabled=isBusy;
+    btn.classList.toggle('is-busy', isBusy);
+    btn.textContent=isBusy ? 'Signing in…' : 'Sign In →';
+  }
+}
+
+function showAppLoading(message){
+  const loader=document.getElementById('appLoading');
+  const text=document.getElementById('loadingText');
+  if(loader) loader.classList.remove('hidden');
+  if(text && message) text.textContent=message;
+}
+
+function hideAppLoading(){
+  const loader=document.getElementById('appLoading');
+  if(loader) loader.classList.add('hidden');
+}
+
+showAppLoading('Connecting to Classmates Chat…');
+setConnectionState('connecting');
+
+socket.on('connect', ()=>{
+  setConnectionState('connected');
+  hideAppLoading();
+  if(!ME) showToast('Connected. You can sign in now.');
+});
+
+socket.on('disconnect', ()=>{
+  setConnectionState('disconnected', 'Connection lost. Reconnecting…');
+});
+
+socket.on('reconnecting', ()=>{
+  setConnectionState('reconnecting', 'Reconnecting…');
+});
+
+socket.on('reconnect', ()=>{
+  setConnectionState('connected');
+  showToast('Reconnected successfully.');
+});
+
 function doLogin(){
   const name=document.getElementById('nameSelect').value;
   const pass=document.getElementById('passInput').value;
@@ -1904,12 +2145,14 @@ function doLogin(){
   err.style.display='none';
   if(!name){ err.textContent='Please choose your name.'; err.style.display='block'; return; }
   if(!pass){ err.textContent='Please enter your password.'; err.style.display='block'; return; }
+  setLoginBusy(true);
   socket.emit('login',{name,password:pass});
 }
 document.getElementById('passInput').addEventListener('keydown',e=>{ if(e.key==='Enter') doLogin(); });
 
 socket.on('loginError', msg=>{
   const err=document.getElementById('loginErr');
+  setLoginBusy(false);
   err.textContent=msg; err.style.display='block';
 });
 
@@ -1920,8 +2163,14 @@ socket.on('loginSuccess', data=>{
   myGroups=data.groups||[];
   allStudents.forEach(s=>{ profileCache[s.name]=s.profile||{}; });
   profileCache[ME]=myProfile;
+  setLoginBusy(false);
+  setConnectionState('connected');
+  hideAppLoading();
   document.getElementById('loginScreen').style.display='none';
   document.getElementById('appScreen').style.display='flex';
+  loadDraftState();
+  restoreDrafts();
+  requestNotifications();
   updateCoinUI(myProfile.coins||0, myProfile.premium||false);
   buildDMList();
   buildGroupList();
@@ -1938,6 +2187,10 @@ function doLogout(){
   document.getElementById('nameSelect').value='';
   document.getElementById('loginErr').style.display='none';
   ['generalMsgs','aiMsgs','studyMsgs'].forEach(id=>{ const el=document.getElementById(id); if(el) el.innerHTML=''; });
+  clearUnreadBadge();
+  setLoginBusy(false);
+  setConnectionState('connected');
+  hideAppLoading();
   if(studyRunning) stopStudy();
 }
 
@@ -2028,6 +2281,7 @@ socket.on('generalHistory', msgs=>{
   const c=document.getElementById('generalMsgs');
   c.innerHTML='';
   msgs.forEach(m=>c.appendChild(buildMsg(m,'gen')));
+  renderPinnedBanner('generalMsgs');
   scrollBottom('generalMsgs');
 });
 
@@ -2035,7 +2289,9 @@ socket.on('generalMessage', msg=>{
   if(msg.premium) { if(!profileCache[msg.sender]) profileCache[msg.sender]={}; profileCache[msg.sender].premium=true; }
   appendMsg('generalMsgs',msg,'gen');
   if(msg.sender!==ME && !document.getElementById('section-general').classList.contains('active')){
+    bumpUnread();
     showToast(`💬 ${msg.sender}: ${(msg.text||'').substring(0,45)}`);
+    pushNotification('New general message', `${msg.sender}: ${msg.text || 'Attachment'}`);
   }
 });
 
@@ -2155,9 +2411,11 @@ socket.on('dmHistory',({with:other,messages})=>{
   c.innerHTML='';
   if(!messages.length){
     c.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--text3);font-size:.83rem">No messages yet. Say hi! 👋</div>';
+    renderPinnedBanner('dmMsgs');
     return;
   }
   messages.forEach(m=>c.appendChild(buildMsg(m,'dm')));
+  renderPinnedBanner('dmMsgs');
   scrollBottom('dmMsgs');
 });
 
@@ -2172,7 +2430,9 @@ socket.on('dmMessage', msg=>{
     const badge=document.getElementById('dmb-'+msg.sender.replace(/\W/g,'-'));
     if(badge){ badge.style.display='flex'; badge.textContent=unread.dm[msg.sender]; }
     document.getElementById('sb-dm').classList.add('has-unread');
+    bumpUnread();
     showToast(`✉️ ${msg.sender}: ${(msg.text||'').substring(0,45)}`);
+    pushNotification('New DM', `${msg.sender}: ${msg.text || 'Attachment'}`);
   }
 });
 
@@ -2258,9 +2518,11 @@ socket.on('groupHistory',({groupId,messages})=>{
   c.innerHTML='';
   if(!messages.length){
     c.innerHTML='<div style="text-align:center;padding:40px 20px;color:var(--text3)">No messages yet. Start the conversation! 👋</div>';
+    renderPinnedBanner('groupMsgs');
     return;
   }
   messages.forEach(m=>c.appendChild(buildMsg(m,'grp')));
+  renderPinnedBanner('groupMsgs');
   scrollBottom('groupMsgs');
 });
 
@@ -2274,8 +2536,10 @@ socket.on('groupMessage', msg=>{
     const badge=document.getElementById('grpb-'+msg.groupId);
     if(badge){ badge.style.display='flex'; badge.textContent=unread.grp[msg.groupId]; }
     document.getElementById('sb-groups').classList.add('has-unread');
+    bumpUnread();
     const g=myGroups.find(x=>x.id===msg.groupId);
     showToast(`👥 ${g?g.name:'Group'}: ${msg.sender}: ${(msg.text||'').substring(0,35)}`);
+    pushNotification(`New group message in ${g?g.name:'Group'}`, `${msg.sender}: ${msg.text || 'Attachment'}`);
   }
 });
 
@@ -2385,6 +2649,16 @@ function leaveGroup(){
 // ═══════════════════════════════════════
 // 5 GREEN AI CHAT
 // ═══════════════════════════════════════
+socket.on('messageReactionUpdated', ({channel,messageId,message})=>{
+  document.querySelectorAll(`[data-msg-id="${messageId}"]`).forEach(row=>{
+    const bubble = row.querySelector('.bubble');
+    if(!bubble) return;
+    const k = channel==='general' ? 'gen' : channel==='dm' ? 'dm' : channel==='group' ? 'grp' : 'ai';
+    const newRow = buildMsg(message, k);
+    row.replaceWith(newRow);
+  });
+});
+
 socket.on('aiMessage', msg=>{
   // hide welcome screen on first message
   const welcome=document.getElementById('aiWelcome');
@@ -3083,6 +3357,20 @@ function sendCallChat(){
 // ═══════════════════════════════════════
 // INIT — close modals on overlay click
 // ═══════════════════════════════════════
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault();
+  deferredInstallPrompt=e;
+  const installBtn=document.getElementById('installBtn');
+  if(installBtn) installBtn.style.display='inline-flex';
+  showToast('📱 Install this app for a better mobile experience.');
+});
+window.addEventListener('appinstalled', ()=>{
+  const installBtn=document.getElementById('installBtn');
+  if(installBtn) installBtn.style.display='none';
+  showToast('✅ App installed.');
+});
+if('serviceWorker' in navigator){ navigator.serviceWorker.register('/sw.js').catch(()=>{}); }
+window.addEventListener('visibilitychange', ()=>{ if(!document.hidden) clearUnreadBadge(); });
 document.querySelectorAll('.modal-overlay').forEach(overlay=>{
   overlay.addEventListener('click', e=>{
     if(e.target===overlay) overlay.classList.remove('open');
@@ -3101,12 +3389,10 @@ document.addEventListener('keydown', e=>{
 // DISCONNECT / RECONNECT HANDLING
 // ═══════════════════════════════════════
 socket.on('disconnect',()=>{
-  showToast('⚠️ Error 404: Homework Not Found — Your internet signal just dropped out faster than your motivation on a Monday morning. Reconnecting before the teacher notices…');
+  showToast('⚠️ Connection lost. Reconnecting…');
 });
 socket.on('connect',()=>{
   if(ME){
-    // auto re-login on reconnect
-    const pass = ''; // can't re-auth without password on reconnect — just show toast
     showToast('🟢 Reconnected!');
   }
 });

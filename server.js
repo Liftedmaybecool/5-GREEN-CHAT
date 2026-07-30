@@ -305,8 +305,22 @@ function storeMessage(msg){
     replyTo: msg.replyTo || null,
     attachment: msg.attachment || null,
     timestamp: msg.timestamp,
+    reactions: msg.reactions || {},
   });
   saveDB();
+}
+
+function updateMessageReaction(channel, messageId, emoji, userName){
+  const target = dbState.messages.find(m => m.id === messageId && m.channel === channel);
+  if (!target) return null;
+  const reactions = target.reactions || {};
+  const users = reactions[emoji] || [];
+  const idx = users.indexOf(userName);
+  if (idx >= 0) users.splice(idx, 1); else users.push(userName);
+  reactions[emoji] = users;
+  target.reactions = reactions;
+  saveDB();
+  return target;
 }
 
 function getGeneralHistory(limit = 100){
@@ -720,6 +734,7 @@ io.on('connection', (socket) => {
       channel: 'dm', replyTo: replyTo || null, timestamp: new Date().toISOString(),
       type: 'dm', premium: getProfile(from).premium,
       attachment: attachment || null,
+      reactions: {},
     };
     storeMessage(msg);
     Object.entries(connectedUsers).forEach(([sid, u]) => {
@@ -770,6 +785,7 @@ io.on('connection', (socket) => {
       channel: 'group', replyTo: replyTo || null, groupId, timestamp: new Date().toISOString(),
       type: 'group', premium: getProfile(name).premium,
       attachment: attachment || null,
+      reactions: {},
     };
     storeMessage(msg);
     g.messages.push(msg);
@@ -1079,6 +1095,23 @@ io.on('connection', (socket) => {
   });
 
   // ── Typing indicators ─────────────────────────────────────────────────────
+  socket.on('toggleReaction', ({ channel, messageId, emoji }) => {
+    const name = socket.data.name;
+    if (!name || !emoji) return;
+    const target = updateMessageReaction(channel, messageId, emoji, name);
+    if (!target) return;
+    if (channel === 'general') io.emit('messageReactionUpdated', { channel, messageId, message: target });
+    else if (channel === 'dm') {
+      const sender = target.sender;
+      const recipient = target.recipient;
+      Object.entries(connectedUsers).forEach(([sid, u]) => {
+        if (u.name === sender || u.name === recipient) io.to(sid).emit('messageReactionUpdated', { channel, messageId, message: target });
+      });
+    } else if (channel === 'group') {
+      io.to(`group_${target.groupId}`).emit('messageReactionUpdated', { channel, messageId, message: target });
+    }
+  });
+
   socket.on('typing', ({ channel, to }) => {
     const name = socket.data.name;
     if (!name) return;
